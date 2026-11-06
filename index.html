@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#0b3d2e">
+<title>Registro de Bloques · Uniguajira</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#0f1714;--card:#18231f;--card2:#1f2d28;--txt:#e8f1ec;--mut:#8fa69b;--pri:#1fb978;--pri2:#16935f;--warn:#f0b429;--bad:#e5484d;--blue:#3b82f6;--bd:#2a3b34}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--txt);padding-bottom:80px}
+header{position:sticky;top:0;z-index:10;background:#0b3d2e;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px;box-shadow:0 2px 8px #0006}
+header h1{font-size:15px;margin:0;line-height:1.2}
+header small{color:#b6d8c8;font-size:12px}
+#clock{font:700 22px ui-monospace,Consolas,monospace}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0b1310;border-top:1px solid var(--bd);z-index:10}
+nav button{flex:1;background:none;border:0;color:var(--mut);padding:10px 2px 12px;font-size:12px;cursor:pointer}
+nav button b{display:block;font-size:20px;margin-bottom:2px}
+nav button.on{color:var(--pri)}
+main{max-width:900px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+h2{font-size:17px;margin:0 0 10px}
+h3{font-size:14px;margin:14px 0 8px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
+label{display:block;font-size:12px;color:var(--mut);margin:8px 0 3px}
+input,select,textarea{width:100%;background:var(--card2);border:1px solid var(--bd);color:var(--txt);border-radius:9px;padding:10px;font-size:15px}
+textarea{min-height:60px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 12px}
+.btn{background:var(--card2);color:var(--txt);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;font-size:14px;cursor:pointer;font-weight:600}
+.btn.pri{background:var(--pri);border-color:var(--pri);color:#04150d}
+.btn.bad{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn.warn{background:var(--warn);border-color:var(--warn);color:#241a00}
+.btn.blue{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.sm{padding:6px 9px;font-size:12px}
+.btn:active{transform:scale(.97)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.big{width:100%;padding:34px 10px;font-size:30px;font-weight:800;border-radius:18px;background:linear-gradient(180deg,#25d08a,#16935f);border:0;color:#03140c;cursor:pointer;box-shadow:0 6px 18px #1fb97855;user-select:none}
+.big:active{transform:scale(.98);filter:brightness(1.1)}
+.big small{display:block;font-size:14px;font-weight:600;opacity:.8;margin-top:4px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin:10px 0}
+.stat{background:var(--card2);border-radius:10px;padding:10px;text-align:center}
+.stat b{display:block;font-size:22px}
+.stat span{font-size:11px;color:var(--mut)}
+.follow{background:var(--card2);border-left:4px solid var(--warn);border-radius:10px;padding:10px;margin-bottom:8px}
+.follow .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;flex-wrap:wrap}
+.follow .times{font:13px ui-monospace,Consolas,monospace;color:var(--mut)}
+.follow .next{flex:1;min-width:150px;padding:14px;font-size:16px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border-bottom:1px solid var(--bd);padding:5px 4px;text-align:center}
+th{color:var(--mut);font-weight:600;position:sticky;top:0;background:var(--card)}
+tr.seg td{background:#2a2a14}
+td input,td select{padding:5px;font-size:13px;font-family:ui-monospace,Consolas,monospace;min-width:84px;text-align:center}
+td select{min-width:58px}
+.tbl{overflow:auto;max-height:60vh}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;background:var(--card2);color:var(--mut)}
+.pill.ok{background:#1fb97833;color:#5be0a6}.pill.no{background:#e5484d33;color:#ff8a8d}
+.alert{background:var(--warn);color:#241a00;padding:12px;border-radius:12px;font-weight:700;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;animation:pulse 1s infinite}
+@keyframes pulse{50%{filter:brightness(1.2)}}
+.step{display:flex;align-items:center;gap:8px}
+.step button{width:48px;height:48px;font-size:24px;border-radius:12px}
+.step b{min-width:46px;text-align:center;font-size:26px}
+.check{padding:6px 0}
+.muted{color:var(--mut);font-size:12px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#000c;padding:10px 16px;border-radius:99px;font-size:14px;z-index:99;pointer-events:none}
+</style>
+</head>
+<body>
+<header>
+  <div><h1 id="hTitle">Registro de Bloques</h1><small id="hSub">Configure el bloque</small></div>
+  <div id="clock">--:--:--</div>
+</header>
+<main id="app"></main>
+<nav>
+  <button data-t="bloque"><b>🏢</b>Bloque</button>
+  <button data-t="registro"><b>⏱️</b>Registro</button>
+  <button data-t="cortes"><b>📸</b>Cortes</button>
+  <button data-t="resumen"><b>📊</b>Resumen</button>
+  <button data-t="datos"><b>💾</b>Datos</button>
+</nav>
+<script>
+/* ================== ESTADO ================== */
+const KEY='regBloques_v1';
+const defCfg={zona:'',bloque:'Bloque Administrativo A',est1:'',est2:'',punto:'',horario:'',c:1,iguales:'Sí',accesos:'',disciplina:'FIFO',fila:'Una sola fila',capEspera:'',turnos:'',abandono:'No',abandonoHora:'',aforo:'',seguirCada:2,unity:{}};
+let S=JSON.parse(localStorage.getItem(KEY)||'null')||{cfg:{...defCfg},sessions:[],cur:null};
+S.cfg={...defCfg,...S.cfg};
+let tab=S.cfg.zona||S.cfg.bloque!==defCfg.bloque?'registro':'bloque';
+const save=()=>localStorage.setItem(KEY,JSON.stringify(S));
+const cur=()=>S.sessions.find(s=>s.id===S.cur);
+const $=s=>document.querySelector(s);
+const pad=n=>String(n).padStart(2,'0');
+const nowT=()=>{const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())};
+const toS=t=>{if(!t||!/^\d{1,2}:\d{2}(:\d{2})?$/.test(t))return null;const p=t.split(':').map(Number);return p[0]*3600+p[1]*60+(p[2]||0)};
+const fromS=s=>{s=((s%86400)+86400)%86400;return pad(Math.floor(s/3600))+':'+pad(Math.floor(s%3600/60))+':'+pad(Math.floor(s%60))};
+const dur=s=>s==null||isNaN(s)?'—':(s<0?'-':'')+Math.floor(Math.abs(s)/60)+'m '+pad(Math.round(Math.abs(s)%60))+'s';
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+const sd=a=>{if(a.length<2)return null;const m=avg(a);return Math.sqrt(a.reduce((x,y)=>x+(y-m)**2,0)/(a.length-1))};
+const r2=x=>x==null||isNaN(x)?'':Math.round(x*100)/100;
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),1400)}
+function beep(f=880,d=.15){try{const a=new (window.AudioContext||window.webkitAudioContext)();const o=a.createOscillator(),g=a.createGain();o.frequency.value=f;o.connect(g);g.connect(a.destination);g.gain.value=.2;o.start();o.stop(a.currentTime+d)}catch(e){}}
+function vib(p=40){if(navigator.vibrate)navigator.vibrate(p)}
+
+/* ================== CÁLCULOS ================== */
+function calcSession(s){
+  const c=+S.cfg.c||1;
+  const P=s.people;
+  const arr=P.filter(p=>p.obs!=='PE'&&toS(p.A)!=null).map(p=>toS(p.A)).sort((a,b)=>a-b);
+  const inter=[];for(let i=1;i<arr.length;i++)inter.push(arr[i]-arr[i-1]);
+  const comp=P.filter(p=>p.seg&&[p.A,p.B,p.C,p.D].every(t=>toS(t)!=null));
+  const wq=comp.map(p=>toS(p.B)-toS(p.A)),ws=comp.map(p=>toS(p.C)-toS(p.B)),wx=comp.map(p=>toS(p.D)-toS(p.C)),w=comp.map(p=>toS(p.D)-toS(p.A));
+  const ini=toS(s.inicio),fin=toS(s.fin)??(arr.length?arr[arr.length-1]:null);
+  const durMin=ini!=null&&fin!=null?(fin-ini)/60:null;
+  const colas=s.cortes.map(k=>+k.cola).filter(x=>!isNaN(x));
+  const ocup=s.cortes.map(k=>+k.ocup).filter(x=>!isNaN(x));
+  return {total:P.length,validas:arr.length,comp:comp.length,pe:P.filter(p=>p.obs==='PE').length,ab:P.filter(p=>p.obs==='AB').length,pr:P.filter(p=>p.obs==='PR').length,
+    durMin,lambda:durMin?arr.length/durMin:null,inter:avg(inter),interSd:sd(inter),wq:avg(wq),wqSd:sd(wq),ws:avg(ws),wsSd:sd(ws),wx:avg(wx),w:avg(w),wSd:sd(w),
+    colaProm:avg(colas),colaMax:colas.length?Math.max(...colas):null,util:ocup.length?avg(ocup)/c:null,cortes:s.cortes.length};
+}
+function checks(s){
+  const seg=s.people.filter(p=>p.seg&&p.obs!=='PE'&&p.obs!=='AB');
+  const orden=seg.every(p=>{const t=[p.A,p.B,p.C,p.D].map(toS).filter(x=>x!=null);return t.every((x,i)=>!i||x>=t[i-1])});
+  const cero=seg.every(p=>!(toS(p.B)!=null&&toS(p.C)!=null&&toS(p.C)-toS(p.B)<=0));
+  const sumCortes=s.cortes.reduce((a,k)=>a+(+k.llegadas||0),0);
+  const servOk=seg.filter(p=>toS(p.B)!=null).every(p=>p.serv);
+  const k=calcSession(s);
+  return [
+    ['En todas las filas se cumple A ≤ B ≤ C ≤ D',orden],
+    ['Ningún tiempo de atención quedó en cero',cero],
+    [`Llegadas Formato 3 (${sumCortes}) coinciden con Hoja 3 (${s.people.length})`,s.cortes.length>0&&sumCortes===s.people.length],
+    ['Columna Serv. diligenciada en filas seguidas',servOk],
+    [`Mínimo 80 llegadas (${k.total})`,k.total>=80],
+    [`Mínimo 30 atenciones completas (${k.comp})`,k.comp>=30],
+    [`Mínimo 6 cortes de 10 min (${k.cortes})`,k.cortes>=6],
+  ];
+}
+
+/* ================== ACCIONES ================== */
+function nuevaSesion(){
+  const n=S.sessions.length+1;
+  const d=new Date();const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const s={id:Date.now(),num:Math.min(n,3)===n?n:n,fecha:d.toISOString().slice(0,10),dia:dias[d.getDay()],inicio:'',fin:'',people:[],cortes:[],clima:'',anormal:'',franja:''};
+  S.sessions.push(s);S.cur=s.id;save();render();
+}
+function iniciar(){const s=cur();s.inicio=nowT();s.fin='';save();beep(660);render()}
+function finalizar(){if(!confirm('¿Finalizar la sesión?'))return;const s=cur();s.fin=nowT();save();render()}
+function llegada(){
+  const s=cur();if(!s)return;
+  if(!s.inicio){s.inicio=nowT()}
+  const n=s.people.length+1,k=+S.cfg.seguirCada||0;
+  s.people.push({n,A:nowT(),B:'',C:'',D:'',serv:'',obs:'',seg:k>0&&(n%k===0||k===1)});
+  save();vib(30);beep(1200,.05);render();
+}
+function deshacer(){const s=cur();if(!s.people.length)return;if(!confirm('¿Borrar la última llegada (N° '+s.people.length+')?'))return;s.people.pop();save();render()}
+function marcar(n,campo){const p=cur().people[n-1];p[campo]=nowT();if(campo==='B'&&!p.serv&&(+S.cfg.c||1)===1)p.serv='1';save();vib(30);render()}
+function setP(n,campo,v){const p=cur().people[n-1];if(campo==='seg')p.seg=v;else p[campo]=v;save();if(campo!=='A'&&campo!=='B'&&campo!=='C'&&campo!=='D')render()}
+function setObs(n,v){const p=cur().people[n-1];p.obs=p.obs===v?'':v;save();render()}
+function corte(){
+  const s=cur();const h=nowT();const prev=s.cortes.length?toS(s.cortes[s.cortes.length-1].hora):toS(s.inicio);const hs=toS(h);
+  const lleg=s.people.filter(p=>{const a=toS(p.A);return a!=null&&a>prev&&a<=hs}).length;
+  const c=+S.cfg.c||1;
+  const enAt=s.people.filter(p=>p.seg&&p.B&&!p.C).length;
+  s.cortes.push({n:s.cortes.length+1,hora:h,llegadas:lleg,cola:0,ocup:Math.min(enAt,c),libres:c-Math.min(enAt,c)});
+  save();beep(500,.3);tab='cortes';render();
+}
+function setCorte(i,campo,v){const s=cur(),k=s.cortes[i],c=+S.cfg.c||1;k[campo]=v;if(campo==='ocup')k.libres=Math.max(0,c-(+v||0));save()}
+function stepCorte(i,campo,d){const s=cur(),k=s.cortes[i];setCorte(i,campo,Math.max(0,(+k[campo]||0)+d));render()}
+function delCorte(i){if(!confirm('¿Eliminar corte?'))return;const s=cur();s.cortes.splice(i,1);s.cortes.forEach((k,j)=>k.n=j+1);save();render()}
+
+/* ================== VISTAS ================== */
+function vBloque(){
+  const c=S.cfg,f=(k,l,ph='',type='text')=>`<div><label>${l}</label><input type="${type}" value="${esc(c[k])}" placeholder="${ph}" onchange="S.cfg['${k}']=this.value;save();hdr()"></div>`;
+  const sel=(k,l,ops)=>`<div><label>${l}</label><select onchange="S.cfg['${k}']=this.value;save()">${ops.map(o=>`<option ${c[k]===o?'selected':''}>${o}</option>`).join('')}</select></div>`;
+  return `<div class="card"><h2>🏢 Hoja 2 · Identificación del bloque</h2><div class="grid">
+  ${f('bloque','Bloque','Bloque Administrativo A')}${f('zona','Zona','Zona 1')}
+  ${f('est1','Estudiante 1 (columna A)')}${f('est2','Estudiante 2 (B, C, D + cortes)')}
+  ${f('punto','Punto exacto observado','Ventanilla de admisiones')}${f('horario','Horario del punto','8:00 – 12:00')}
+  </div></div>
+  <div class="card"><h2>⚙️ Formato 1 · Parámetros estructurales</h2><div class="grid">
+  ${f('c','Número de servidores (c)','1','number')}${sel('iguales','¿Servidores iguales?',['Sí','No'])}
+  ${f('accesos','Accesos del bloque (cuántos; cuál observa)','2; puerta principal')}${sel('disciplina','Disciplina de la cola',['FIFO','Prioridad','Sin orden'])}
+  ${sel('fila','¿Una sola fila o una por servidor?',['Una sola fila','Una por servidor'])}${f('capEspera','Capacidad zona de espera (personas)','','number')}
+  ${f('turnos','Turnos del personal')}${sel('abandono','¿Se va gente al ver la fila?',['No','Sí'])}
+  ${f('abandonoHora','Si sí, ¿cuántas por hora?','','number')}${f('aforo','Aforo publicado del bloque','','number')}
+  </div></div>
+  <div class="card"><h2>👣 Seguimiento</h2>
+  <label>Seguir (fila sombreada) a 1 de cada N personas · 0 = elegir manualmente</label>
+  <input type="number" min="0" value="${c.seguirCada}" onchange="S.cfg.seguirCada=+this.value;save()">
+  <p class="muted">Recomendado: 2 (con 80 llegadas → ~40 seguidas, cubre el mínimo de 30 atenciones completas). Puede marcar/desmarcar cualquiera en la tabla.</p>
+  <button class="btn pri" onclick="tab='registro';render()">Listo → Ir a registrar</button></div>`;
+}
+function vSesionSel(){
+  return `<div class="row" style="margin-bottom:10px"><select style="flex:1" onchange="S.cur=+this.value;save();render()">
+  ${S.sessions.map(s=>`<option value="${s.id}" ${s.id===S.cur?'selected':''}>Sesión ${s.num} · ${s.fecha} · ${s.people.length} llegadas</option>`).join('')}</select>
+  <button class="btn" onclick="nuevaSesion()">＋ Nueva</button></div>`;
+}
+function vRegistro(){
+  const s=cur();
+  if(!s)return `<div class="card"><h2>Sin sesiones</h2><p class="muted">Cree la sesión 1 para empezar a registrar en <b>${esc(S.cfg.bloque)}</b>.</p><button class="btn pri" onclick="nuevaSesion()">＋ Crear sesión</button></div>`;
+  const k=calcSession(s);
+  const pend=s.people.filter(p=>p.seg&&!p.D&&p.obs!=='AB'&&p.obs!=='PE');
+  const c=+S.cfg.c||1;
+  let h=vSesionSel()+cutAlert(s)+`<div class="card">
+  <div class="grid"><div><label>Sesión N°</label><input type="number" value="${s.num}" onchange="cur().num=+this.value;save();hdr()"></div>
+  <div><label>Fecha</label><input type="date" value="${s.fecha}" onchange="cur().fecha=this.value;save()"></div>
+  <div><label>Día</label><input value="${esc(s.dia)}" onchange="cur().dia=this.value;save()"></div></div>
+  <div class="row" style="margin-top:10px">
+  ${!s.inicio?`<button class="btn pri" onclick="iniciar()">▶ Iniciar sesión</button>`:`<span class="pill">Inicio ${s.inicio}</span>`}
+  ${s.inicio&&!s.fin?`<span class="pill" id="elapsed"></span><button class="btn bad sm" onclick="finalizar()">■ Finalizar</button>`:''}
+  ${s.fin?`<span class="pill">Fin ${s.fin}</span><button class="btn sm" onclick="cur().fin='';save();render()">Reabrir</button>`:''}
+  <button class="btn warn sm" onclick="corte()">📸 Corte ahora</button></div></div>
+  <button class="big" onclick="llegada()">＋ LLEGADA<small>N° ${s.people.length+1} · toque cuando cruce la frontera de entrada</small></button>
+  <div class="stats"><div class="stat"><b>${k.total}</b><span>Llegadas /80</span></div><div class="stat"><b>${k.comp}</b><span>Completas /30</span></div>
+  <div class="stat"><b>${pend.length}</b><span>En seguimiento</span></div><div class="stat"><b>${k.cortes}</b><span>Cortes /6</span></div></div>`;
+  h+=`<div class="card"><h2>👣 Personas en seguimiento</h2>${pend.length?'':'<p class="muted">Nadie pendiente. Las filas sombreadas aparecerán aquí.</p>'}`;
+  pend.slice().reverse().forEach(p=>{
+    const nx=!p.B?['B','▶ Inicio atención','blue']:!p.C?['C','✔ Fin atención','pri']:['D','🚪 Salida','warn'];
+    h+=`<div class="follow"><div class="top"><b>#${p.n}</b><span class="times">A ${p.A} · B ${p.B||'—'} · C ${p.C||'—'}</span>
+    <select style="width:auto" onchange="setP(${p.n},'serv',this.value)"><option value="">Serv.</option>${Array.from({length:c},(_,i)=>`<option ${p.serv==i+1?'selected':''}>${i+1}</option>`).join('')}</select></div>
+    <div class="row"><button class="btn ${nx[2]} next" onclick="marcar(${p.n},'${nx[0]}')">${nx[1]}</button>
+    <button class="btn sm ${p.obs==='PR'?'warn':''}" onclick="setObs(${p.n},'PR')">PR</button>
+    <button class="btn sm" onclick="setObs(${p.n},'AB')" title="Se fue sin ser atendido">AB</button>
+    <button class="btn sm" onclick="setObs(${p.n},'PE')" title="Perdida">PE</button></div></div>`;
+  });
+  h+=`</div><div class="card"><div class="row" style="justify-content:space-between"><h2>📋 Hoja 3 · Registro</h2><button class="btn bad sm" onclick="deshacer()">↶ Deshacer última</button></div>
+  <p class="muted">Sombreadas = seguidas. Puede editar cualquier hora (hh:mm:ss). Obs: AB se fue · PE perdida · PR prioridad.</p>
+  <div class="tbl"><table><thead><tr><th>N°</th><th>Seg</th><th>A. Llegada</th><th>B. Inicio</th><th>C. Fin</th><th>D. Salida</th><th>Serv</th><th>Obs</th></tr></thead><tbody>
+  ${s.people.slice().reverse().map(p=>`<tr class="${p.seg?'seg':''}"><td>${p.n}</td><td><input type="checkbox" style="min-width:0;width:20px" ${p.seg?'checked':''} onchange="setP(${p.n},'seg',this.checked)"></td>
+  ${['A','B','C','D'].map(f=>`<td><input value="${p[f]}" ${f!=='A'&&!p.seg?'disabled':''} onchange="setP(${p.n},'${f}',this.value.trim())"></td>`).join('')}
+  <td><input value="${esc(p.serv)}" style="min-width:40px" onchange="setP(${p.n},'serv',this.value)"></td>
+  <td><select onchange="setP(${p.n},'obs',this.value)">${['','AB','PE','PR'].map(o=>`<option ${p.obs===o?'selected':''}>${o}</option>`).join('')}</select></td></tr>`).join('')}
+  </tbody></table></div></div>`;
+  return h;
+}
+function cutAlert(s){
+  if(!s||!s.inicio||s.fin)return '';
+  const next=toS(s.inicio)+600*(s.cortes.length+1);
+  const left=next-toS(nowT());
+  if(left<=0)return `<div class="alert">📸 ¡Toca el corte ${s.cortes.length+1}! <button class="btn" onclick="corte()">Hacer corte</button></div>`;
+  return `<div class="muted" style="margin-bottom:8px">Próximo corte (${s.cortes.length+1}) a las ${fromS(next)} · faltan <span id="cutLeft">${dur(left)}</span></div>`;
+}
+function vCortes(){
+  const s=cur();if(!s)return vRegistro();
+  return vSesionSel()+cutAlert(s)+`<div class="card"><div class="row" style="justify-content:space-between"><h2>📸 Formato 3 · Conteo cada 10 min</h2><button class="btn warn" onclick="corte()">Corte ahora</button></div>
+  <p class="muted">Al tocar "Corte" se guarda la hora exacta y las llegadas de los últimos 10 min se calculan solas. Ajuste cola y servidores ocupados. Un 0 medido es dato.</p>
+  ${s.cortes.slice().reverse().map(k=>{const i=k.n-1;return `<div class="follow" style="border-left-color:var(--blue)"><div class="top"><b>Corte ${k.n}</b>
+  <input style="width:110px" value="${k.hora}" onchange="setCorte(${i},'hora',this.value)"><button class="btn sm" onclick="delCorte(${i})">🗑</button></div>
+  <div class="grid">
+  <div><label>Llegadas en los 10 min</label><div class="step"><button class="btn" onclick="stepCorte(${i},'llegadas',-1)">−</button><b>${k.llegadas}</b><button class="btn" onclick="stepCorte(${i},'llegadas',1)">＋</button></div></div>
+  <div><label>Personas en cola</label><div class="step"><button class="btn" onclick="stepCorte(${i},'cola',-1)">−</button><b>${k.cola}</b><button class="btn" onclick="stepCorte(${i},'cola',1)">＋</button></div></div>
+  <div><label>Servidores ocupados (libres: ${k.libres})</label><div class="step"><button class="btn" onclick="stepCorte(${i},'ocup',-1)">−</button><b>${k.ocup}</b><button class="btn" onclick="stepCorte(${i},'ocup',1)">＋</button></div></div>
+  </div></div>`}).join('')||'<p class="muted">Aún no hay cortes.</p>'}</div>`;
+}
+function statRows(k){
+  return [['Llegadas registradas',k.total],['Llegadas válidas (sin PE)',k.validas],['Atenciones completas',k.comp],['Perdidas (PE)',k.pe],['Abandonos (AB)',k.ab],['Con prioridad (PR)',k.pr],
+  ['Duración (min)',r2(k.durMin)],['Tasa de llegada λ (pers/min)',r2(k.lambda)],['Tasa de llegada (pers/hora)',r2(k.lambda*60)],
+  ['Tiempo entre llegadas prom.',dur(k.inter)+(k.interSd!=null?' (σ '+dur(k.interSd)+')':'')],['Espera en cola prom. (B−A)',dur(k.wq)],['Tiempo de atención prom. (C−B)',dur(k.ws)],
+  ['Salida tras atención (D−C)',dur(k.wx)],['Tiempo en el sistema / recorrido (D−A)',dur(k.w)],['Cola promedio (cortes)',r2(k.colaProm)],['Cola máxima (cortes)',k.colaMax??''],['Utilización servidores ρ',k.util!=null?Math.round(k.util*100)+'%':'']];
+}
+function vResumen(){
+  const s=cur();if(!s)return vRegistro();
+  const k=calcSession(s);
+  return vSesionSel()+`<div class="card"><h2>📊 Formato 4 · Resumen sesión ${s.num}</h2><table>${statRows(k).map(r=>`<tr><td style="text-align:left">${r[0]}</td><td><b>${r[1]}</b></td></tr>`).join('')}</table>
+  <label>Clima y condiciones del día</label><input value="${esc(s.clima)}" onchange="cur().clima=this.value;save()">
+  <label>Algo anormal que explique datos raros</label><textarea onchange="cur().anormal=this.value;save()">${esc(s.anormal)}</textarea>
+  <label>Franja pico</label><input value="${esc(s.franja)}" placeholder="9:00–10:00" onchange="cur().franja=this.value;save()"></div>
+  <div class="card"><h2>✅ Revisión antes de guardar</h2>${checks(s).map(c=>`<div class="check"><span class="pill ${c[1]?'ok':'no'}">${c[1]?'✔':'✘'}</span> ${c[0]}</div>`).join('')}</div>`+vConsolidado();
+}
+function allPeople(){return S.sessions.flatMap(s=>s.people.map(p=>({...p,s})))}
+function consolidado(){
+  const ks=S.sessions.map(calcSession);
+  const m=f=>r2(avg(ks.map(f).filter(x=>x!=null&&!isNaN(x))));
+  const mm=f=>{const v=avg(ks.map(f).filter(x=>x!=null&&!isNaN(x)));return v==null?'':r2(v/60)+' min'};
+  return [
+    ['Personas promedio por sesión (llegadas)',m(k=>k.total)],
+    ['Personas promedio por hora',m(k=>k.lambda*60)],
+    ['Tiempo promedio de recorrido / sistema (D−A)',mm(k=>k.w)],
+    ['Tiempo promedio de espera (B−A)',mm(k=>k.wq)],
+    ['Tiempo promedio de atención (C−B)',mm(k=>k.ws)],
+    ['Capacidad del espacio (espera / aforo)',(S.cfg.capEspera||'—')+' / '+(S.cfg.aforo||'—')],
+    ['Frecuencia de llegada λ (pers/min)',m(k=>k.lambda)],
+    ['Tiempo entre llegadas promedio (s)',m(k=>k.inter)],
+    ['Cola promedio',m(k=>k.colaProm)],
+    ['Número de servidores (c)',S.cfg.c],
+    ['Utilización promedio ρ',m(k=>k.util)],
+    ['Abandonos promedio por sesión',m(k=>k.ab)],
+  ];
+}
+function vConsolidado(){
+  return `<div class="card"><h2>🧩 Consolidación de datos (todas las sesiones: ${S.sessions.length})</h2>
+  <table><thead><tr><th style="text-align:left">Variable</th><th>Dato observado</th><th>Valor en Unity</th></tr></thead><tbody>
+  ${consolidado().map(r=>`<tr><td style="text-align:left">${r[0]}</td><td><b>${r[1]}</b></td><td><input value="${esc(S.cfg.unity[r[0]]||'')}" onchange="S.cfg.unity['${r[0]}']=this.value;save()"></td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+function vDatos(){
+  return `<div class="card"><h2>💾 Exportar</h2>
+  <p class="muted">Archivo: Zona#_Bloque#_Pareja.xlsx · una sola hoja de cálculo por pareja, con sesión y fecha al inicio.</p>
+  <div class="row"><button class="btn pri" onclick="exportXLSX()">⬇ Excel (.xlsx)</button><button class="btn" onclick="exportCSV()">⬇ CSV llegadas</button><button class="btn" onclick="exportJSON()">⬇ Respaldo JSON</button>
+  <label class="btn" style="margin:0;color:var(--txt)">⬆ Importar JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(this.files[0])"></label></div></div>
+  <div class="card"><h2>Sesiones</h2>${S.sessions.map(s=>`<div class="row" style="justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span>Sesión ${s.num} · ${s.fecha} · ${s.people.length} llegadas · ${s.cortes.length} cortes</span>
+  <button class="btn bad sm" onclick="if(confirm('¿Borrar sesión ${s.num}?')){S.sessions=S.sessions.filter(x=>x.id!==${s.id});if(S.cur===${s.id})S.cur=S.sessions[0]?.id||null;save();render()}">Borrar</button></div>`).join('')||'<p class="muted">Sin sesiones.</p>'}
+  <button class="btn bad" style="margin-top:12px" onclick="if(confirm('¿Borrar TODO?')&&confirm('Seguro, se perderán los datos')){localStorage.removeItem(KEY);location.reload()}">Borrar todo</button></div>
+  <p class="muted">Los datos se guardan automáticamente en este navegador (funciona sin internet una vez cargada). Exporte un respaldo al terminar cada sesión.</p>`;
+}
+
+/* ================== EXPORTAR ================== */
+function fname(ext){const c=S.cfg;const cl=x=>String(x||'').replace(/[^\w]+/g,'');return `${cl(c.zona)||'Zona'}_${cl(c.bloque)||'Bloque'}_${cl(c.est1)}${c.est2?'-'+cl(c.est2):''}.${ext}`}
+function rowsLlegadas(){
+  return allPeople().map(p=>{const d=(a,b)=>toS(p[a])!=null&&toS(p[b])!=null?toS(p[b])-toS(p[a]):'';
+    return {'Sesión':p.s.num,'Fecha':p.s.fecha,'Día':p.s.dia,'Zona':S.cfg.zona,'Bloque':S.cfg.bloque,'N°':p.n,'Seguida':p.seg?'Sí':'No','A. Llegada':p.A,'B. Inicio atención':p.B,'C. Fin atención':p.C,'D. Salida':p.D,'Serv.':p.serv,'Obs.':p.obs,
+    'Espera B-A (s)':d('A','B'),'Atención C-B (s)':d('B','C'),'Salida D-C (s)':d('C','D'),'Sistema D-A (s)':d('A','D')}});
+}
+function rowsCortes(){return S.sessions.flatMap(s=>s.cortes.map(k=>({'Sesión':s.num,'Fecha':s.fecha,'Corte':k.n,'Hora exacta':k.hora,'Llegadas en los 10 min':+k.llegadas,'Personas en cola':+k.cola,'Servidores ocupados':+k.ocup,'Servidores libres':+k.libres})))}
+function exportXLSX(){
+  if(!window.XLSX){toast('Sin librería Excel (sin internet). Use CSV.');return}
+  const wb=XLSX.utils.book_new(),c=S.cfg;
+  const f1=[['Zona',c.zona],['Bloque',c.bloque],['Estudiante 1',c.est1],['Estudiante 2',c.est2],['Punto exacto observado',c.punto],['Horario del punto',c.horario],[],
+    ['FORMATO 1 · Parámetro','Valor'],['Número de servidores (c)',c.c],['¿Servidores iguales?',c.iguales],['Accesos del bloque',c.accesos],['Disciplina de la cola',c.disciplina],['¿Una sola fila o una por servidor?',c.fila],
+    ['Capacidad de la zona de espera',c.capEspera],['Turnos del personal',c.turnos],['¿Se va gente al ver la fila?',c.abandono],['Abandonos por hora',c.abandonoHora],['Aforo publicado del bloque',c.aforo]];
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(f1),'Bloque (F1)');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rowsLlegadas()),'Registro (Hoja 3)');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rowsCortes()),'Cortes (F3)');
+  const res=[['Indicador',...S.sessions.map(s=>'Sesión '+s.num)]];
+  const sr=S.sessions.map(s=>statRows(calcSession(s)));
+  if(sr.length)sr[0].forEach((r,i)=>res.push([r[0],...sr.map(x=>x[i][1])]));
+  res.push(['Fecha',...S.sessions.map(s=>s.fecha)],['Hora inicio',...S.sessions.map(s=>s.inicio)],['Hora fin',...S.sessions.map(s=>s.fin)],['Franja pico',...S.sessions.map(s=>s.franja)],['Clima',...S.sessions.map(s=>s.clima)],['Anormal',...S.sessions.map(s=>s.anormal)]);
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(res),'Resumen (F4)');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Variable','Datos observados','Valor utilizado en Unity'],...consolidado().map(r=>[r[0],r[1],c.unity[r[0]]||''])]),'Consolidación');
+  XLSX.writeFile(wb,fname('xlsx'));
+}
+function dl(name,data,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type}));a.download=name;a.click()}
+function exportCSV(){const r=rowsLlegadas();if(!r.length)return toast('Sin datos');const h=Object.keys(r[0]);dl(fname('csv'),'\ufeff'+[h.join(';'),...r.map(x=>h.map(k=>`"${String(x[k]).replace(/"/g,'""')}"`).join(';'))].join('\n'),'text/csv')}
+function exportJSON(){dl(fname('json'),JSON.stringify(S,null,1),'application/json')}
+function importJSON(f){if(!f)return;f.text().then(t=>{try{const d=JSON.parse(t);if(!d.cfg||!d.sessions)throw 0;if(confirm('¿Reemplazar los datos actuales?')){S=d;S.cfg={...defCfg,...S.cfg};save();render();toast('Importado')}}catch(e){alert('Archivo inválido')}})}
+
+/* ================== RENDER ================== */
+function hdr(){const s=cur();$('#hTitle').textContent=S.cfg.bloque||'Registro de Bloques';$('#hSub').textContent=(S.cfg.zona?S.cfg.zona+' · ':'')+(s?'Sesión '+s.num+' · '+s.fecha:'Sin sesión')}
+function render(){
+  const y=scrollY;
+  $('#app').innerHTML={bloque:vBloque,registro:vRegistro,cortes:vCortes,resumen:vResumen,datos:vDatos}[tab]();
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
+  hdr();scrollTo(0,y);
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render();scrollTo(0,0)});
+let alerted=-1;
+setInterval(()=>{
+  $('#clock').textContent=nowT();
+  const s=cur();if(!s||!s.inicio||s.fin)return;
+  const el=$('#elapsed');if(el)el.textContent='⏱ '+dur(toS(nowT())-toS(s.inicio));
+  const left=toS(s.inicio)+600*(s.cortes.length+1)-toS(nowT());
+  const cl=$('#cutLeft');if(cl)cl.textContent=dur(left);
+  if(left<=0&&alerted!==s.cortes.length){alerted=s.cortes.length;beep(700,.4);vib([200,100,200]);if(tab==='registro'||tab==='cortes'){const a=document.activeElement;if(!a||a.tagName!=='INPUT')render()}}
+},1000);
+render();
+</script>
+</body>
+</html>
