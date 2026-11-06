@@ -30,15 +30,22 @@ input,select,textarea{width:100%;background:var(--card2);border:1px solid var(--
 .btn.bad{background:var(--bad);border-color:var(--bad);color:#fff}
 .btn.warn{background:var(--warn);border-color:var(--warn);color:#241a00}
 .btn.blue{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.purple{background:#a855f725;border-color:#a855f788;color:#c084fc}
 .btn.sm{padding:5px 8px;font-size:11px;border-radius:7px}
 .btn:active{transform:scale(.97)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 
 /* SELECTOR DE PUERTAS (DELANTERA / TRASERA) */
-.door-switch{display:flex;background:var(--card2);border:1px solid var(--bd);border-radius:12px;padding:4px;gap:6px;margin:8px 0}
-.door-tab{flex:1;background:none;border:1px solid transparent;color:var(--mut);padding:10px 8px;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s ease}
+.door-switch{display:flex;background:var(--card2);border:1px solid var(--bd);border-radius:12px;padding:4px;gap:6px;margin:6px 0}
+.door-tab{flex:1;background:none;border:1px solid transparent;color:var(--mut);padding:8px 6px;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s ease}
 .door-tab.sel-del{background:#1fb97825;color:#4ade80;border-color:#1fb97888}
 .door-tab.sel-tras{background:#3b82f625;color:#60a5fa;border-color:#3b82f688}
+
+/* SELECTOR DE TIPO (ESTUDIANTE / FUNCIONARIO) */
+.type-switch{display:flex;background:var(--card2);border:1px solid var(--bd);border-radius:12px;padding:4px;gap:6px;margin:6px 0}
+.type-tab{flex:1;background:none;border:1px solid transparent;color:var(--mut);padding:8px 6px;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s ease}
+.type-tab.sel-est{background:#1fb97825;color:#4ade80;border-color:#1fb97888}
+.type-tab.sel-func{background:#a855f725;color:#c084fc;border-color:#a855f788}
 
 /* ESTADO DE SESIÓN */
 .sess-bar{background:var(--card2);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
@@ -51,7 +58,7 @@ input,select,textarea{width:100%;background:var(--card2);border:1px solid var(--
 .btn-start:active{transform:scale(.98);filter:brightness(1.1)}
 .btn-start span{font-size:12px;font-weight:600;opacity:.85;letter-spacing:.3px}
 
-.btn-entry{width:100%;padding:26px 12px;font-size:24px;font-weight:800;border-radius:16px;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;user-select:none}
+.btn-entry{width:100%;padding:24px 12px;font-size:22px;font-weight:800;border-radius:16px;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;user-select:none}
 .btn-entry:active{transform:scale(.98);filter:brightness(1.1)}
 .btn-entry span{font-size:12px;font-weight:600;opacity:.9;letter-spacing:.3px}
 .btn-del{background:linear-gradient(180deg,#2ad38d,#15935d);color:#02140a;box-shadow:0 6px 18px #1fb97844}
@@ -60,7 +67,7 @@ input,select,textarea{width:100%;background:var(--card2);border:1px solid var(--
 /* TARJETAS DE PERSONAS ADENTRO */
 .p-card{background:var(--card2);border:1px solid var(--bd);border-left:4px solid var(--pri);border-radius:12px;padding:10px;margin-bottom:8px}
 .p-card.trasera{border-left-color:var(--blue)}
-.p-card.atencion{border-left-color:var(--warn)}
+.p-card.piso2{border-left-color:var(--purple)}
 .p-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:6px}
 .p-id{font-weight:800;font-size:15px;color:var(--txt)}
 .p-time{font:12px ui-monospace,Consolas,monospace;color:#a7c4b7}
@@ -72,11 +79,12 @@ input,select,textarea{width:100%;background:var(--card2);border:1px solid var(--
 .badge.ok{background:#1fb97825;color:#4ade80}
 .badge.warn{background:#f0b42925;color:#fbbf24}
 .badge.blue{background:#3b82f625;color:#60a5fa}
+.badge.purple{background:#a855f725;color:#c084fc}
 .badge.bad{background:#e5484d25;color:#f87171}
 
 .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}
 .stat-box{background:var(--card2);border-radius:10px;padding:8px 4px;text-align:center}
-.stat-box b{display:block;font-size:20px;color:var(--txt)}
+.stat-box b{display:block;font-size:18px;color:var(--txt)}
 .stat-box span{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.3px}
 
 .alert{background:var(--warn);color:#241a00;padding:10px 12px;border-radius:10px;font-weight:700;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:6px;animation:pulse 1s infinite}
@@ -125,18 +133,18 @@ const defCfg = {
   zona: 'Zona 1',
   est1: 'Balmes',
   est2: '',
-  punto: 'Puerta delantera y trasera / Ventanilla',
+  punto: 'Puerta delantera y trasera · 2 Pisos',
   horario: 'Hora pico',
   c: 1,
   iguales: 'Sí',
   accesos: '2 accesos (Delantera y Trasera)',
   disciplina: 'FIFO',
   fila: 'Una sola fila',
-  capEspera: '20',
+  capEspera: '25',
   turnos: 'Jornada continua',
   abandono: 'No',
   abandonoHora: '0',
-  aforo: '50',
+  aforo: '60',
   seguirCada: 1,
   unity: {}
 };
@@ -182,7 +190,8 @@ if(!S.sessions || S.sessions.length === 0){
 }
 
 let tab = 'registro';
-let puertaActual = 'Delantera'; // Estado activo: 'Delantera' o 'Trasera'
+let puertaActual = 'Delantera';    // 'Delantera' o 'Trasera'
+let tipoActual = 'Estudiante';      // 'Estudiante' o 'Funcionario'
 
 const save = () => localStorage.setItem(KEY, JSON.stringify(S));
 const cur = () => S.sessions.find(s => s.id === S.cur) || S.sessions[S.sessions.length - 1];
@@ -232,7 +241,7 @@ function beep(f=880, d=.12){
 }
 function vib(p=35){ if(navigator.vibrate) navigator.vibrate(p); }
 
-/* ================== CÁLCULOS ================== */
+/* ================== CÁLCULOS INTEGRALES PARA UNITY ================== */
 function calcSession(s){
   if(!s) return {};
   const c = +S.cfg.c || 1;
@@ -257,9 +266,27 @@ function calcSession(s){
 
   const adentro = P.filter(p => p.A && !p.D && p.obs !== 'AB' && p.obs !== 'PE').length;
 
-  // Desglose por puerta delantera y trasera
+  // Desglose por puerta
   const del = P.filter(p => (p.puerta || 'Delantera') === 'Delantera').length;
   const tras = P.filter(p => p.puerta === 'Trasera').length;
+
+  // Desglose por tipo (Estudiante / Funcionario)
+  const est = P.filter(p => (p.tipo || 'Estudiante') === 'Estudiante').length;
+  const func = P.filter(p => p.tipo === 'Funcionario').length;
+
+  // Desglose por piso (Piso 1 vs Piso 2)
+  const piso2 = P.filter(p => p.piso === 'Piso 2').length;
+  const piso1 = P.length - piso2;
+
+  // Tiempos diferenciados por piso (para el NavMesh en Unity)
+  const compP1 = comp.filter(p => p.piso !== 'Piso 2');
+  const compP2 = comp.filter(p => p.piso === 'Piso 2');
+  const wPiso1 = avg(compP1.map(p => toS(p.D) - toS(p.A)));
+  const wPiso2 = avg(compP2.map(p => toS(p.D) - toS(p.A)));
+
+  // Tiempo hasta tomar escaleras
+  const conEscalera = P.filter(p => p.piso === 'Piso 2' && toS(p.horaPiso2)!=null && toS(p.A)!=null);
+  const wEscalera = avg(conEscalera.map(p => toS(p.horaPiso2) - toS(p.A)));
 
   return {
     total: P.length,
@@ -268,6 +295,14 @@ function calcSession(s){
     adentro,
     del,
     tras,
+    est,
+    func,
+    piso1,
+    piso2,
+    pctPiso2: P.length ? Math.round((piso2/P.length)*100) : 0,
+    wPiso1,
+    wPiso2,
+    wEscalera,
     pe: P.filter(p=>p.obs==='PE').length,
     ab: P.filter(p=>p.obs==='AB').length,
     pr: P.filter(p=>p.obs==='PR').length,
@@ -288,7 +323,7 @@ function calcSession(s){
   };
 }
 
-/* ================== CICLO DE VIDA DE SESIONES (START / CERRAR) ================== */
+/* ================== CICLO DE VIDA DE SESIONES ================== */
 function iniciarSesion(){
   const s = cur();
   if(!s) return;
@@ -317,7 +352,6 @@ function cerrarSesion(){
   beep(440, .3);
   vib([100, 60, 100]);
 
-  // CREAR INMEDIATAMENTE OTRA SESIÓN LIMPIA QUE NO TIENE NADA QUE VER
   const nextNum = S.sessions.length + 1;
   const nextS = crearNuevaSesionObj(nextNum);
   S.sessions.push(nextS);
@@ -357,28 +391,29 @@ function cambiarSesion(id){
 }
 
 /* ================== REGISTRO DE ENTRADAS Y SALIDAS ================== */
-function setPuerta(p){
-  puertaActual = p;
-  vib(20);
-  render();
-}
+function setPuerta(p){ puertaActual = p; vib(20); render(); }
+function setTipo(t){ tipoActual = t; vib(20); render(); }
 
-function entradaRapida(puerta = null, tag = ''){
+function entradaRapida(puerta = null, tipo = null, tag = ''){
   const s = cur();
   if(s.fin){
     toast('Esta sesión ya está cerrada. Crea una nueva sesión.');
     return;
   }
-  // Si no había dado a Start explícito, arranca sesión automáticamente a la hora actual
   if(!s.inicio) s.inicio = nowT();
 
   const pFinal = puerta || puertaActual || 'Delantera';
-  puertaActual = pFinal; // sincronizar activa
+  const tFinal = tipo || tipoActual || 'Estudiante';
+  puertaActual = pFinal;
+  tipoActual = tFinal;
 
   const n = s.people.length + 1;
   s.people.push({
     n,
     puerta: pFinal,
+    tipo: tFinal,
+    piso: 'Piso 1',     // Todos entran por la planta baja
+    horaPiso2: '',      // Se llena si sube escaleras
     nombre: tag,
     A: nowT(),
     B: '',
@@ -390,8 +425,49 @@ function entradaRapida(puerta = null, tag = ''){
   });
   save();
   vib(40);
-  beep(pFinal === 'Trasera' ? 1400 : 1100, .06);
-  toast(`Entrada #${n} (${pFinal}) registrada`);
+  beep(tFinal === 'Funcionario' ? 1400 : 1100, .06);
+  toast(`Entrada #${n} (${pFinal} · ${tFinal})`);
+  render();
+}
+
+// Acción: la persona toma las escaleras y sube al piso 2
+function subirPiso2(n){
+  const s = cur();
+  const p = s.people.find(x => x.n === n);
+  if(!p) return;
+  p.piso = 'Piso 2';
+  p.horaPiso2 = nowT();
+  save();
+  vib([40, 40]);
+  beep(1350, .09);
+  const tDesdeEntrada = toS(p.horaPiso2) - toS(p.A);
+  toast(`Persona #${n} subió al Piso 2 (tardó ${dur(tDesdeEntrada)})`);
+  render();
+}
+
+function togglePisoPersona(n){
+  const s = cur();
+  const p = s.people.find(x => x.n === n);
+  if(!p) return;
+  if(p.piso === 'Piso 2'){
+    p.piso = 'Piso 1';
+    p.horaPiso2 = '';
+  } else {
+    p.piso = 'Piso 2';
+    p.horaPiso2 = nowT();
+  }
+  save();
+  toast(`Persona #${n}: ${p.piso}`);
+  render();
+}
+
+function toggleTipoPersona(n){
+  const s = cur();
+  const p = s.people.find(x => x.n === n);
+  if(!p) return;
+  p.tipo = (p.tipo === 'Funcionario') ? 'Estudiante' : 'Funcionario';
+  save();
+  toast(`Persona #${n}: ${p.tipo}`);
   render();
 }
 
@@ -401,7 +477,7 @@ function togglePuertaPersona(n){
   if(!p) return;
   p.puerta = (p.puerta === 'Trasera') ? 'Delantera' : 'Trasera';
   save();
-  toast(`Persona #${n}: Puerta cambiada a ${p.puerta}`);
+  toast(`Persona #${n}: Puerta ${p.puerta}`);
   render();
 }
 
@@ -415,7 +491,7 @@ function marcarSalida(n){
   vib(50);
   beep(750, .09);
   const estancia = toS(p.D) - toS(p.A);
-  toast(`Salida #${n} · Estancia: ${dur(estancia)}`);
+  toast(`Salida #${n} (${p.piso}) · Estancia: ${dur(estancia)}`);
   render();
 }
 
@@ -450,7 +526,7 @@ function deshacerUltima(){
   const s = cur();
   if(!s.people.length) return;
   const ult = s.people[s.people.length - 1];
-  if(!confirm(`¿Eliminar la última llegada (#${ult.n} - ${ult.puerta||'Delantera'})?`)) return;
+  if(!confirm(`¿Eliminar la última llegada (#${ult.n} - ${ult.puerta||'Delantera'} - ${ult.tipo||'Estudiante'})?`)) return;
   s.people.pop();
   save();
   toast('Última llegada eliminada');
@@ -524,7 +600,7 @@ function guardarBloqueRapido(){
   render();
 }
 
-/* ================== VISTA: REGISTRO (CON SELECTOR DE PUERTAS) ================== */
+/* ================== VISTA: REGISTRO ================== */
 function vRegistro(){
   const s = cur();
   const k = calcSession(s);
@@ -554,7 +630,10 @@ function vRegistro(){
     <div class="card" style="text-align:center;padding:22px 14px;background:linear-gradient(180deg,#14201b,#1c2f25);border:2px solid var(--pri)">
       <div style="font-size:36px;margin-bottom:6px">⏱️</div>
       <h2 style="justify-content:center;margin:0 0 6px;font-size:20px">Sesión ${s.num} · Lista para Iniciar</h2>
-      <div class="muted" style="margin-bottom:16px">Bloque: <b>${esc(S.cfg.bloque)}</b> · Accesos: <b>Delantera y Trasera</b></div>
+      <div class="muted" style="margin-bottom:16px">
+        <b>${esc(S.cfg.bloque)}</b><br>
+        <span style="font-size:11px">P1: Vic. Extensión & Cs. Aplicadas · P2: ORI, Graduados & Docencia</span>
+      </div>
       <button class="btn-start" onclick="iniciarSesion()">
         ▶ START · INICIAR TOMA DE DATOS
         <span>Toma la hora local exacta al pulsar</span>
@@ -564,7 +643,7 @@ function vRegistro(){
       </div>
     </div>`;
   }
-  // ESTADO 2: EN CURSO (MOSTRAR INICIO Y BOTÓN CERRAR)
+  // ESTADO 2: EN CURSO
   else if(s.inicio && !s.fin){
     const elapsed = toS(s.inicio) ? dur(nowSeg - toS(s.inicio)) : '0m';
     h += `
@@ -608,25 +687,41 @@ function vRegistro(){
     </div>`;
   }
 
-  // Barra de resumen táctil con desglose Delantera / Trasera
+  // Barra de resumen táctil
   h += `
   <div class="stats-bar">
-    <div class="stat-box"><b>${k.total}</b><span>Total Llegadas</span></div>
-    <div class="stat-box" style="border:1px solid #1fb97866"><b style="color:#4ade80">${k.del}</b><span style="color:#4ade80">Delantera</span></div>
-    <div class="stat-box" style="border:1px solid #3b82f666"><b style="color:#60a5fa">${k.tras}</b><span style="color:#60a5fa">Trasera</span></div>
+    <div class="stat-box"><b>${k.total}</b><span>Llegadas</span></div>
+    <div class="stat-box" style="border:1px solid #1fb97866"><b style="color:#4ade80">${k.del}/${k.tras}</b><span>Del / Tras</span></div>
+    <div class="stat-box" style="border:1px solid #a855f766"><b style="color:#c084fc">${k.piso2}</b><span>Subieron P2</span></div>
     <div class="stat-box"><b>${k.adentro}</b><span>Adentro</span></div>
   </div>`;
 
-  // SELECTOR Y BOTONES DE ENTRADA (DELANTERA / TRASERA)
+  // SELECTOR DE TIPO Y PUERTA + BOTÓN GIGANTE
   if(!s.fin){
     const esDel = (puertaActual === 'Delantera');
+    const esEst = (tipoActual === 'Estudiante');
+
     h += `
     <div class="card" style="padding:10px;margin-bottom:12px;background:var(--card2)">
-      <div style="font-size:11px;color:var(--mut);text-transform:uppercase;font-weight:700;letter-spacing:.4px;margin-bottom:4px">
-        Seleccionar puerta para registrar:
+      <!-- 1. TIPO DE PERSONA -->
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.3px">
+        <span>1. ¿Quién entra?</span>
+        <span style="color:${esEst?'#4ade80':'#c084fc'}">${tipoActual}</span>
+      </div>
+      <div class="type-switch">
+        <button class="type-tab ${esEst ? 'sel-est' : ''}" onclick="setTipo('Estudiante')">
+          🎓 Estudiante (Trámite / Cola)
+        </button>
+        <button class="type-tab ${!esEst ? 'sel-func' : ''}" onclick="setTipo('Funcionario')">
+          💼 Funcionario / Profe
+        </button>
       </div>
 
-      <!-- TABS SELECTORAS -->
+      <!-- 2. PUERTA DE ENTRADA -->
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-top:6px">
+        <span>2. ¿Por cuál acceso?</span>
+        <span style="color:${esDel?'#4ade80':'#60a5fa'}">${puertaActual}</span>
+      </div>
       <div class="door-switch">
         <button class="door-tab ${esDel ? 'sel-del' : ''}" onclick="setPuerta('Delantera')">
           🚪 Puerta Delantera (${k.del})
@@ -636,21 +731,24 @@ function vRegistro(){
         </button>
       </div>
 
-      <!-- BOTÓN GIGANTE PRINCIPAL SEGÚN PUERTA ACTIVA -->
+      <!-- BOTÓN GIGANTE -->
       <div class="tap-zone">
-        <button class="btn-entry ${esDel ? 'btn-del' : 'btn-tras'}" onclick="entradaRapida(puertaActual)">
-          ＋ REGISTRAR ENTRADA (${puertaActual.toUpperCase()})
-          <span>Puerta ${puertaActual} · Guarda hora exacta</span>
+        <button class="btn-entry ${esDel ? 'btn-del' : 'btn-tras'}" onclick="entradaRapida(puertaActual, tipoActual)">
+          ＋ REGISTRAR ENTRADA
+          <span>${puertaActual.toUpperCase()} · ${tipoActual.toUpperCase()}</span>
         </button>
       </div>
 
-      <!-- BOTONES DE ACCESO RÁPIDO DIRECTO (1 TOQUE CUALQUIERA DE LAS DOS) -->
-      <div class="row" style="margin-top:6px;gap:8px">
-        <button class="btn sm" style="flex:1;background:var(--card);border:1px solid #1fb97888;color:#4ade80;font-weight:700;padding:11px" onclick="entradaRapida('Delantera')">
-          ＋ Delantera rápida
+      <!-- BOTONES RÁPIDOS 1-TOQUE -->
+      <div class="row" style="margin-top:6px;gap:6px">
+        <button class="btn sm" style="flex:1;background:var(--card);border:1px solid #1fb97877;color:#4ade80;font-weight:700;padding:9px" onclick="entradaRapida('Delantera','Estudiante')">
+          ＋ Est. Delantera
         </button>
-        <button class="btn sm" style="flex:1;background:var(--card);border:1px solid #3b82f688;color:#60a5fa;font-weight:700;padding:11px" onclick="entradaRapida('Trasera')">
-          ＋ Trasera rápida
+        <button class="btn sm" style="flex:1;background:var(--card);border:1px solid #3b82f677;color:#60a5fa;font-weight:700;padding:9px" onclick="entradaRapida('Trasera','Estudiante')">
+          ＋ Est. Trasera
+        </button>
+        <button class="btn sm" style="flex:1;background:var(--card);border:1px solid #a855f777;color:#c084fc;font-weight:700;padding:9px" onclick="entradaRapida(puertaActual,'Funcionario')">
+          ＋ Funcionario
         </button>
       </div>
     </div>`;
@@ -667,8 +765,8 @@ function vRegistro(){
   // LISTA DE PERSONAS ACTUALMENTE ADENTRO
   h += `<div class="card">
     <h2>
-      <span>🚶 Personas adentro (${adentroList.length})</span>
-      <small class="muted">Toca "Salida" cuando salgan</small>
+      <span>🚶 Personas en el Bloque (${adentroList.length})</span>
+      <small class="muted">Toca "Subió P2" o "Salida"</small>
     </h2>`;
 
   if(adentroList.length === 0){
@@ -677,16 +775,23 @@ function vRegistro(){
     adentroList.slice().reverse().forEach(p => {
       const transcurrido = nowSeg ? nowSeg - toS(p.A) : 0;
       const esT = (p.puerta === 'Trasera');
+      const esFunc = (p.tipo === 'Funcionario');
+      const enP2 = (p.piso === 'Piso 2');
 
       h += `
-      <div class="p-card ${esT ? 'trasera' : ''}">
+      <div class="p-card ${enP2 ? 'piso2' : (esT ? 'trasera' : '')}">
         <div class="p-top">
           <div class="row">
             <span class="p-id">#${p.n}</span>
-            <span class="badge ${esT ? 'blue' : 'ok'}" onclick="togglePuertaPersona(${p.n})" title="Toca para cambiar de puerta" style="cursor:pointer">
-              🚪 ${p.puerta||'Delantera'} ⇄
+            <span class="badge ${esFunc ? 'purple' : 'ok'}" onclick="toggleTipoPersona(${p.n})" title="Toca para cambiar tipo" style="cursor:pointer">
+              ${esFunc ? '💼 Funcionario' : '🎓 Estudiante'}
             </span>
-            <input class="p-tag-input" value="${esc(p.nombre||'')}" placeholder="Nota/Nombre (opcional)" onchange="setPersonaTag(${p.n}, this.value)">
+            <span class="badge ${esT ? 'blue' : 'ok'}" onclick="togglePuertaPersona(${p.n})" title="Toca para cambiar puerta" style="cursor:pointer">
+              🚪 ${p.puerta||'Delantera'}
+            </span>
+            <span class="badge ${enP2 ? 'purple' : 'warn'}" onclick="togglePisoPersona(${p.n})" title="Toca para cambiar piso" style="cursor:pointer">
+              ${enP2 ? '🪜 Piso 2 (ORI/Grad/Doc)' : '📍 Piso 1'}
+            </span>
           </div>
           <div class="p-time">
             Entró: <b>${p.A}</b> · <span class="badge ${p.C?'ok':(p.B?'warn':'ok')}">${dur(transcurrido)}</span>
@@ -694,17 +799,31 @@ function vRegistro(){
         </div>
 
         <div class="p-actions">
+          <!-- BOTÓN DIRECTO DE SALIDA -->
           <button class="btn warn sm" style="font-weight:700;padding:8px 14px" onclick="marcarSalida(${p.n})">
             🚪 MARCAR SALIDA
           </button>
 
+          <!-- BOTÓN DE SUBIDA AL PISO 2 -->
+          ${!enP2 ? `
+            <button class="btn purple sm" style="font-weight:700;padding:8px 12px" onclick="subirPiso2(${p.n})">
+              🪜 Subió a Piso 2
+            </button>
+          ` : `
+            <span class="badge purple" style="padding:6px 8px">Subió a las ${p.horaPiso2||'—'}</span>
+          `}
+
+          <!-- ATENCIÓN EN VENTANILLA (SI APLICA) -->
           ${!p.B ? `
-            <button class="btn sm blue" onclick="marcarPaso(${p.n},'B')">▶ Inició atención</button>
+            <button class="btn sm blue" onclick="marcarPaso(${p.n},'B')">▶ Inició fila/atención</button>
           ` : (!p.C ? `
             <button class="btn sm pri" onclick="marcarPaso(${p.n},'C')">✔ Fin atención</button>
           ` : `
             <span class="badge ok">Atendido</span>
           `)}
+
+          <!-- NOTA OPCIONAL -->
+          <input class="p-tag-input" value="${esc(p.nombre||'')}" placeholder="Nota (opcional)" onchange="setPersonaTag(${p.n}, this.value)">
 
           <button class="btn sm ${p.obs==='AB'?'bad':''}" title="Abandonó la fila" onclick="setObsPersona(${p.n},'AB')">AB</button>
           <button class="btn sm ${p.obs==='PE'?'bad':''}" title="Dato perdido" onclick="setObsPersona(${p.n},'PE')">PE</button>
@@ -718,34 +837,39 @@ function vRegistro(){
   h += `
   <div class="card">
     <h2>
-      <span>📋 Personas en Sesión ${s.num} (${s.people.length})</span>
+      <span>📋 Historial Sesión ${s.num} (${s.people.length})</span>
     </h2>
     <div class="tbl">
       <table>
         <thead>
           <tr>
             <th>#</th>
+            <th>Tipo</th>
             <th>Puerta</th>
+            <th>Piso</th>
             <th>Llegada</th>
+            <th>Subió P2</th>
             <th>Salida</th>
             <th>Estancia</th>
-            <th>Atención</th>
             <th>Obs</th>
           </tr>
         </thead>
         <tbody>
           ${s.people.slice().reverse().map(p => {
             const estancia = toS(p.A)!=null && toS(p.D)!=null ? dur(toS(p.D)-toS(p.A)) : '—';
-            const atencion = toS(p.B)!=null && toS(p.C)!=null ? dur(toS(p.C)-toS(p.B)) : '—';
             const esT = (p.puerta === 'Trasera');
+            const esFunc = (p.tipo === 'Funcionario');
+            const enP2 = (p.piso === 'Piso 2');
             return `
             <tr>
               <td><b>#${p.n}</b> ${esc(p.nombre||'')}</td>
+              <td><span class="badge ${esFunc ? 'purple' : 'ok'}">${p.tipo||'Estudiante'}</span></td>
               <td><span class="badge ${esT ? 'blue' : 'ok'}">${p.puerta||'Delantera'}</span></td>
+              <td><span class="badge ${enP2 ? 'purple' : 'warn'}">${p.piso||'Piso 1'}</span></td>
               <td>${p.A||'—'}</td>
+              <td>${p.horaPiso2||'—'}</td>
               <td>${p.D||'<span class="badge warn">Adentro</span>'}</td>
               <td>${estancia}</td>
-              <td>${atencion}</td>
               <td><span class="badge ${p.obs?'bad':''}">${p.obs||'—'}</span></td>
             </tr>`;
           }).join('')}
@@ -822,29 +946,32 @@ function vResumen(){
     ['Personas promedio por sesión (total)', m(x=>x.total)],
     ['Llegadas por Puerta Delantera (promedio)', m(x=>x.del)],
     ['Llegadas por Puerta Trasera (promedio)', m(x=>x.tras)],
-    ['% Flujo Puerta Delantera', m(x=>x.total) ? Math.round((m(x=>x.del)/m(x=>x.total))*100)+'%' : '—'],
-    ['% Flujo Puerta Trasera', m(x=>x.total) ? Math.round((m(x=>x.tras)/m(x=>x.total))*100)+'%' : '—'],
+    ['% Estudiantes (agentes con trámite/cola)', m(x=>x.total) ? Math.round((m(x=>x.est)/m(x=>x.total))*100)+'%' : '—'],
+    ['% Funcionarios/Docentes (permanencia laboral)', m(x=>x.total) ? Math.round((m(x=>x.func)/m(x=>x.total))*100)+'%' : '—'],
+    ['% Agentes hacia Piso 1 (Extensión / Cs. Aplicadas)', m(x=>x.total) ? Math.round((m(x=>x.piso1)/m(x=>x.total))*100)+'%' : '—'],
+    ['% Agentes hacia Piso 2 (Escaleras → ORI / Grad / Doc)', m(x=>x.total) ? Math.round((m(x=>x.piso2)/m(x=>x.total))*100)+'%' : '—'],
     ['Frecuencia total de llegada λ (pers/min)', m(x=>x.lambda)],
     ['Frecuencia Spawner Delantera (pers/min)', m(x=>x.lambdaDel)],
     ['Frecuencia Spawner Trasera (pers/min)', m(x=>x.lambdaTras)],
-    ['Tiempo promedio de recorrido en bloque (D−A)', mm(x=>x.w)],
+    ['Tiempo de tránsito a escaleras (s)', m(x=>x.wEscalera)+' s'],
+    ['Tiempo promedio de recorrido en Piso 1', mm(x=>x.wPiso1)],
+    ['Tiempo promedio de recorrido en Piso 2', mm(x=>x.wPiso2)],
+    ['Tiempo promedio general en el bloque (D−A)', mm(x=>x.w)],
     ['Tiempo promedio de espera en cola (B−A)', mm(x=>x.wq)],
-    ['Tiempo promedio de atención en ventanilla (C−B)', mm(x=>x.ws)],
     ['Capacidad del espacio (espera / aforo)', (S.cfg.capEspera||'—')+' / '+(S.cfg.aforo||'—')],
-    ['Cola promedio observada', m(x=>x.colaProm)],
-    ['Utilización promedio de servidores ρ', m(x=>x.util) ? Math.round(m(x=>x.util)*100)+'%' : '—']
+    ['Cola promedio observada', m(x=>x.colaProm)]
   ];
 
   return `
   <div class="card">
-    <h2>🧩 Consolidación y Parámetros para Unity (Todas las sesiones: ${S.sessions.length})</h2>
-    <p class="muted">Parámetros listos para configurar tus generadores de agentes (Spawners) Delantero y Trasero en Unity:</p>
+    <h2>🧩 Parámetros Validados para Unity (${S.sessions.length} sesiones)</h2>
+    <p class="muted">Datos listos para configurar tus Spawners, NavMesh y árbol de decisiones de agentes en Unity:</p>
     <table>
       <thead>
         <tr>
-          <th style="text-align:left">Variable</th>
+          <th style="text-align:left">Parámetro del Modelo</th>
           <th>Dato Observado Real</th>
-          <th>Valor usado en Unity</th>
+          <th>Valor en Unity</th>
         </tr>
       </thead>
       <tbody>
@@ -863,13 +990,12 @@ function vResumen(){
     <h2>📊 Resumen Sesión Actual (#${s.num})</h2>
     <table>
       <tr><td style="text-align:left">Estado</td><td><b>${s.fin ? 'Cerrada ('+s.inicio+' a '+s.fin+')' : (s.inicio ? 'En curso (desde '+s.inicio+')' : 'Sin iniciar')}</b></td></tr>
-      <tr><td style="text-align:left">Llegadas Puerta Delantera</td><td><b style="color:#4ade80">${k.del}</b></td></tr>
-      <tr><td style="text-align:left">Llegadas Puerta Trasera</td><td><b style="color:#60a5fa">${k.tras}</b></td></tr>
-      <tr><td style="text-align:left">Total de llegadas</td><td><b>${k.total}</b></td></tr>
+      <tr><td style="text-align:left">Total de llegadas</td><td><b>${k.total}</b> (Del: ${k.del} · Tras: ${k.tras})</td></tr>
+      <tr><td style="text-align:left">Estudiantes vs Funcionarios</td><td><b>${k.est}</b> Estudiantes · <b>${k.func}</b> Funcionarios</td></tr>
+      <tr><td style="text-align:left">Distribución por Piso</td><td>Piso 1: <b>${k.piso1}</b> · Subieron a Piso 2: <b>${k.piso2} (${k.pctPiso2}%)</b></td></tr>
       <tr><td style="text-align:left">Total salidas completas</td><td><b>${k.comp}</b></td></tr>
       <tr><td style="text-align:left">Personas aún adentro</td><td><b>${k.adentro}</b></td></tr>
       <tr><td style="text-align:left">Tiempo prom. de recorrido (D−A)</td><td><b>${dur(k.w)}</b></td></tr>
-      <tr><td style="text-align:left">Tiempo prom. entre llegadas</td><td><b>${dur(k.inter)}</b></td></tr>
       <tr><td style="text-align:left">Cortes de 10 min realizados</td><td><b>${k.cortes} / 6</b></td></tr>
     </table>
   </div>`;
@@ -880,7 +1006,7 @@ function vDatos(){
   return `
   <div class="card">
     <h2>💾 Descargar Archivos para la Entrega</h2>
-    <p class="muted">Genera el archivo oficial <b>${fname('xlsx')}</b> con las 5 hojas requeridas por la universidad conteniendo todas tus sesiones (${S.sessions.length}). Incluye la columna de Puerta de Entrada (Delantera / Trasera).</p>
+    <p class="muted">Genera el archivo oficial <b>${fname('xlsx')}</b> con las 5 hojas requeridas por la universidad conteniendo todas tus sesiones (${S.sessions.length}). Incluye tipo de persona, puerta de entrada y piso.</p>
     <div class="row" style="margin-bottom:12px">
       <button class="btn pri" onclick="exportXLSX()">⬇ Descargar Excel (.xlsx)</button>
       <button class="btn" onclick="exportCSV()">⬇ CSV</button>
@@ -893,12 +1019,11 @@ function vDatos(){
     <h2>Sesiones Guardadas (${S.sessions.length})</h2>
     ${S.sessions.map(s => {
       const durac = s.inicio && s.fin ? dur(toS(s.fin)-toS(s.inicio)) : (s.inicio ? 'En curso' : 'Sin iniciar');
-      const del = s.people.filter(p=>(p.puerta||'Delantera')==='Delantera').length;
-      const tras = s.people.filter(p=>p.puerta==='Trasera').length;
+      const p2 = s.people.filter(p=>p.piso==='Piso 2').length;
       return `
       <div class="row" style="justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)">
         <div>
-          <b>Sesión ${s.num}</b> · ${s.fecha} · ${s.people.length} pers (Del: ${del} · Tras: ${tras}) · <span class="badge ${s.fin?'ok':(s.inicio?'warn':'')}">${durac}</span>
+          <b>Sesión ${s.num}</b> · ${s.fecha} · ${s.people.length} pers (P2: ${p2}) · <span class="badge ${s.fin?'ok':(s.inicio?'warn':'')}">${durac}</span>
         </div>
         <div class="row">
           <button class="btn sm" onclick="cambiarSesion(${s.id});tab='registro';render()">Abrir</button>
@@ -917,14 +1042,14 @@ function vBloque(){
 
   return `
   <div class="card">
-    <h2>🏢 Datos del Bloque (Pre-llenados)</h2>
-    <p class="muted">Estos datos ya tienen valores por defecto para que no pierdas tiempo. Modifícalos solo si deseas ajustarlos para el Excel.</p>
+    <h2>🏢 Datos del Bloque Administrativo</h2>
+    <p class="muted">Estructura del bloque de dos pisos para tu modelo:</p>
     <div class="grid">
       ${f('bloque','Bloque en observación','Bloque Administrativo A')}
       ${f('zona','Zona','Zona 1')}
       ${f('est1','Estudiante (Tú)','Balmes')}
       ${f('est2','Compañero (opcional)','')}
-      ${f('punto','Punto exacto observado','Puerta delantera y trasera / Bloque Adm A')}
+      ${f('punto','Piso 1: Vic. Extensión & Cs. Aplicadas · Piso 2: ORI, Graduados & Docencia')}
       ${f('horario','Horario','Hora pico')}
     </div>
   </div>
@@ -937,8 +1062,8 @@ function vBloque(){
       ${f('accesos','Accesos del bloque','2 accesos (Delantera y Trasera)')}
       ${sel('disciplina','Disciplina de cola',['FIFO','Prioridad','Sin orden'])}
       ${sel('fila','Tipo de fila',['Una sola fila','Una por servidor'])}
-      ${f('capEspera','Capacidad de espera (personas)','20','number')}
-      ${f('aforo','Aforo total del bloque','50','number')}
+      ${f('capEspera','Capacidad de espera (personas)','25','number')}
+      ${f('aforo','Aforo total del bloque','60','number')}
     </div>
     <div style="margin-top:12px">
       <button class="btn pri" onclick="tab='registro';render()">← Volver al Registro</button>
@@ -963,15 +1088,19 @@ function rowsLlegadas(){
       'Día': p.s.dia,
       'Bloque': S.cfg.bloque,
       'N°': p.n,
+      'Tipo de Persona': p.tipo || 'Estudiante',
       'Puerta de Entrada': p.puerta || 'Delantera',
+      'Piso / Destino': p.piso || 'Piso 1',
       'Etiqueta / Nota': p.nombre || '',
       'A. Llegada': p.A,
+      'Hora Subió Piso 2': p.horaPiso2 || '',
       'B. Inicio atención': p.B,
       'C. Fin atención': p.C,
       'D. Salida': p.D,
+      'Tiempo recorrido total D-A (s)': d('A','D'),
+      'Tiempo hasta subir a P2 (s)': d('A','horaPiso2'),
       'Espera en cola B-A (s)': d('A','B'),
       'Atención C-B (s)': d('B','C'),
-      'Tiempo recorrido en bloque D-A (s)': d('A','D'),
       'Obs': p.obs
     };
   });
@@ -984,13 +1113,14 @@ function exportXLSX(){
   // Hoja 1: Parámetros del Bloque
   const f1 = [
     ['UNIVERSIDAD DE LA GUAJIRA - SIMULACIÓN'],
-    ['FORMATO DE TOMA DE DATOS EN BLOQUES'],
+    ['FORMATO DE TOMA DE DATOS EN BLOQUES ADMINISTRATIVOS'],
     [],
     ['Zona', c.zona],
     ['Bloque', c.bloque],
     ['Estudiante 1', c.est1],
     ['Estudiante 2', c.est2],
-    ['Punto observado', c.punto],
+    ['Piso 1', 'Vicerrectoría de Extensión y Facultad de Ciencias Aplicadas'],
+    ['Piso 2', 'ORI, Centro de Graduados y Vicerrectoría de Docencia'],
     ['Horario', c.horario],
     [],
     ['PARÁMETROS ESTRUCTURALES (FORMATO 1)', 'VALOR'],
@@ -1004,7 +1134,7 @@ function exportXLSX(){
   ];
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(f1), 'Bloque (F1)');
 
-  // Hoja 2: Registro con Puerta de Entrada
+  // Hoja 2: Registro con Tipo, Puerta y Piso
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rowsLlegadas()), 'Registro (Hoja 3)');
 
   // Hoja 3: Cortes cada 10 min
@@ -1019,7 +1149,7 @@ function exportXLSX(){
   })));
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rCortes), 'Cortes (F3)');
 
-  // Hoja 4: Resumen de sesiones con horas de inicio, fin y desglose de puertas
+  // Hoja 4: Resumen de sesiones
   const res = [
     ['Indicador', ...S.sessions.map(s => 'Sesión ' + s.num)],
     ['Fecha', ...S.sessions.map(s => s.fecha)],
@@ -1028,12 +1158,15 @@ function exportXLSX(){
     ['Duración', ...S.sessions.map(s => s.inicio && s.fin ? dur(toS(s.fin)-toS(s.inicio)) : '—')],
     ['Llegadas Puerta Delantera', ...S.sessions.map(s => calcSession(s).del)],
     ['Llegadas Puerta Trasera', ...S.sessions.map(s => calcSession(s).tras)],
+    ['Estudiantes (trámite/cola)', ...S.sessions.map(s => calcSession(s).est)],
+    ['Funcionarios (personal laboral)', ...S.sessions.map(s => calcSession(s).func)],
+    ['Agentes en Piso 1', ...S.sessions.map(s => calcSession(s).piso1)],
+    ['Agentes que subieron a Piso 2', ...S.sessions.map(s => calcSession(s).piso2)],
     ['Total llegadas', ...S.sessions.map(s => s.people.length)],
     ['Salidas completas', ...S.sessions.map(s => calcSession(s).comp)],
-    ['Tiempo prom. recorrido', ...S.sessions.map(s => dur(calcSession(s).w))],
-    ['Tasa total (pers/min)', ...S.sessions.map(s => r2(calcSession(s).lambda))],
-    ['Tasa Spawner Delantera (pers/min)', ...S.sessions.map(s => r2(calcSession(s).lambdaDel))],
-    ['Tasa Spawner Trasera (pers/min)', ...S.sessions.map(s => r2(calcSession(s).lambdaTras))]
+    ['Tiempo prom. recorrido Piso 1', ...S.sessions.map(s => dur(calcSession(s).wPiso1))],
+    ['Tiempo prom. recorrido Piso 2', ...S.sessions.map(s => dur(calcSession(s).wPiso2))],
+    ['Tiempo prom. recorrido general', ...S.sessions.map(s => dur(calcSession(s).w))]
   ];
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(res), 'Resumen Sesiones (F4)');
 
@@ -1043,14 +1176,16 @@ function exportXLSX(){
   const tUnity = [
     ['Variable para Unity', 'Datos Observados', 'Valor utilizado en Unity'],
     ['Personas promedio (Total)', m(x=>x.total), c.unity['Personas promedio por sesión (total)']||m(x=>x.total)],
-    ['Llegadas Puerta Delantera (promedio)', m(x=>x.del), c.unity['Llegadas por Puerta Delantera (promedio)']||m(x=>x.del)],
-    ['Llegadas Puerta Trasera (promedio)', m(x=>x.tras), c.unity['Llegadas por Puerta Trasera (promedio)']||m(x=>x.tras)],
+    ['% Estudiantes (Trámite)', m(x=>x.total) ? Math.round((m(x=>x.est)/m(x=>x.total))*100)+'%' : '—', ''],
+    ['% Funcionarios (Laboral)', m(x=>x.total) ? Math.round((m(x=>x.func)/m(x=>x.total))*100)+'%' : '—', ''],
+    ['% Probabilidad Destino Piso 1', m(x=>x.total) ? Math.round((m(x=>x.piso1)/m(x=>x.total))*100)+'%' : '—', ''],
+    ['% Probabilidad Destino Piso 2 (Escaleras)', m(x=>x.total) ? Math.round((m(x=>x.piso2)/m(x=>x.total))*100)+'%' : '—', ''],
     ['Tasa Spawner Delantera (pers/min)', m(x=>x.lambdaDel), c.unity['Frecuencia Spawner Delantera (pers/min)']||m(x=>x.lambdaDel)],
     ['Tasa Spawner Trasera (pers/min)', m(x=>x.lambdaTras), c.unity['Frecuencia Spawner Trasera (pers/min)']||m(x=>x.lambdaTras)],
-    ['Tiempo promedio de recorrido', r2(m(x=>x.w)/60)+' min', c.unity['Tiempo promedio de recorrido en bloque (D−A)']||r2(m(x=>x.w)/60)+' min'],
-    ['Tiempo promedio de espera', r2(m(x=>x.wq)/60)+' min', c.unity['Tiempo promedio de espera en cola (B−A)']||'0 min'],
-    ['Capacidad del espacio', c.capEspera + ' / ' + c.aforo, c.capEspera],
-    ['Frecuencia total de llegada', m(x=>x.lambda)+' pers/min', c.unity['Frecuencia total de llegada λ (pers/min)']||m(x=>x.lambda)]
+    ['Tiempo promedio recorrido Piso 1', r2(m(x=>x.wPiso1)/60)+' min', ''],
+    ['Tiempo promedio recorrido Piso 2', r2(m(x=>x.wPiso2)/60)+' min', ''],
+    ['Tiempo promedio de recorrido general', r2(m(x=>x.w)/60)+' min', c.unity['Tiempo promedio de recorrido en bloque (D−A)']||r2(m(x=>x.w)/60)+' min'],
+    ['Frecuencia total de llegada λ', m(x=>x.lambda)+' pers/min', c.unity['Frecuencia total de llegada λ (pers/min)']||m(x=>x.lambda)]
   ];
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(tUnity), 'Consolidación Unity');
 
