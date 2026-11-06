@@ -34,30 +34,38 @@ input,select,textarea{width:100%;background:var(--card2);border:1px solid var(--
 .btn:active{transform:scale(.97)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 
+/* SELECTOR DE PUERTAS (DELANTERA / TRASERA) */
+.door-switch{display:flex;background:var(--card2);border:1px solid var(--bd);border-radius:12px;padding:4px;gap:6px;margin:8px 0}
+.door-tab{flex:1;background:none;border:1px solid transparent;color:var(--mut);padding:10px 8px;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s ease}
+.door-tab.sel-del{background:#1fb97825;color:#4ade80;border-color:#1fb97888}
+.door-tab.sel-tras{background:#3b82f625;color:#60a5fa;border-color:#3b82f688}
+
 /* ESTADO DE SESIÓN */
 .sess-bar{background:var(--card2);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .sess-bar.running{border-color:#1fb97866;background:#0e291e}
 .sess-bar.closed{border-color:#f0b42966;background:#241f14}
 
 /* BOTONES GIGANTES DE ENTRADA Y START */
-.tap-zone{display:grid;grid-template-columns:1fr;gap:10px;margin:10px 0}
+.tap-zone{display:grid;grid-template-columns:1fr;gap:10px;margin:8px 0}
 .btn-start{width:100%;padding:24px 12px;font-size:22px;font-weight:800;border-radius:16px;background:linear-gradient(180deg,#2ad38d,#15935d);border:0;color:#02140a;cursor:pointer;box-shadow:0 6px 20px #1fb97855;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
 .btn-start:active{transform:scale(.98);filter:brightness(1.1)}
 .btn-start span{font-size:12px;font-weight:600;opacity:.85;letter-spacing:.3px}
 
-.btn-entry{width:100%;padding:26px 12px;font-size:24px;font-weight:800;border-radius:16px;background:linear-gradient(180deg,#2ad38d,#15935d);border:0;color:#02140a;cursor:pointer;box-shadow:0 6px 18px #1fb97844;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.btn-entry{width:100%;padding:26px 12px;font-size:24px;font-weight:800;border-radius:16px;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;user-select:none}
 .btn-entry:active{transform:scale(.98);filter:brightness(1.1)}
-.btn-entry span{font-size:12px;font-weight:600;opacity:.85;letter-spacing:.3px}
+.btn-entry span{font-size:12px;font-weight:600;opacity:.9;letter-spacing:.3px}
+.btn-del{background:linear-gradient(180deg,#2ad38d,#15935d);color:#02140a;box-shadow:0 6px 18px #1fb97844}
+.btn-tras{background:linear-gradient(180deg,#4f9cf8,#2563eb);color:#ffffff;box-shadow:0 6px 18px #3b82f644}
 
 /* TARJETAS DE PERSONAS ADENTRO */
 .p-card{background:var(--card2);border:1px solid var(--bd);border-left:4px solid var(--pri);border-radius:12px;padding:10px;margin-bottom:8px}
-.p-card.atencion{border-left-color:var(--blue)}
-.p-card.cola{border-left-color:var(--warn)}
+.p-card.trasera{border-left-color:var(--blue)}
+.p-card.atencion{border-left-color:var(--warn)}
 .p-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:6px}
 .p-id{font-weight:800;font-size:15px;color:var(--txt)}
 .p-time{font:12px ui-monospace,Consolas,monospace;color:#a7c4b7}
 .p-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.p-tag-input{background:none;border:0;border-bottom:1px dashed var(--bd);color:#cbdad2;font-size:12px;padding:2px 4px;width:130px}
+.p-tag-input{background:none;border:0;border-bottom:1px dashed var(--bd);color:#cbdad2;font-size:12px;padding:2px 4px;width:120px}
 .p-tag-input:focus{outline:0;border-bottom-color:var(--pri)}
 
 .badge{display:inline-block;padding:2px 7px;border-radius:99px;font-size:11px;font-weight:700}
@@ -117,11 +125,11 @@ const defCfg = {
   zona: 'Zona 1',
   est1: 'Balmes',
   est2: '',
-  punto: 'Puerta principal / Ventanilla',
+  punto: 'Puerta delantera y trasera / Ventanilla',
   horario: 'Hora pico',
   c: 1,
   iguales: 'Sí',
-  accesos: '1 acceso principal',
+  accesos: '2 accesos (Delantera y Trasera)',
   disciplina: 'FIFO',
   fila: 'Una sola fila',
   capEspera: '20',
@@ -174,6 +182,7 @@ if(!S.sessions || S.sessions.length === 0){
 }
 
 let tab = 'registro';
+let puertaActual = 'Delantera'; // Estado activo: 'Delantera' o 'Trasera'
 
 const save = () => localStorage.setItem(KEY, JSON.stringify(S));
 const cur = () => S.sessions.find(s => s.id === S.cur) || S.sessions[S.sessions.length - 1];
@@ -248,16 +257,24 @@ function calcSession(s){
 
   const adentro = P.filter(p => p.A && !p.D && p.obs !== 'AB' && p.obs !== 'PE').length;
 
+  // Desglose por puerta delantera y trasera
+  const del = P.filter(p => (p.puerta || 'Delantera') === 'Delantera').length;
+  const tras = P.filter(p => p.puerta === 'Trasera').length;
+
   return {
     total: P.length,
     validas: arr.length,
     comp: comp.length,
     adentro,
+    del,
+    tras,
     pe: P.filter(p=>p.obs==='PE').length,
     ab: P.filter(p=>p.obs==='AB').length,
     pr: P.filter(p=>p.obs==='PR').length,
     durMin,
     lambda: durMin ? arr.length/durMin : null,
+    lambdaDel: durMin ? del/durMin : null,
+    lambdaTras: durMin ? tras/durMin : null,
     inter: avg(inter),
     interSd: sd(inter),
     wq: avg(wq),
@@ -340,7 +357,13 @@ function cambiarSesion(id){
 }
 
 /* ================== REGISTRO DE ENTRADAS Y SALIDAS ================== */
-function entradaRapida(tag=''){
+function setPuerta(p){
+  puertaActual = p;
+  vib(20);
+  render();
+}
+
+function entradaRapida(puerta = null, tag = ''){
   const s = cur();
   if(s.fin){
     toast('Esta sesión ya está cerrada. Crea una nueva sesión.');
@@ -349,9 +372,13 @@ function entradaRapida(tag=''){
   // Si no había dado a Start explícito, arranca sesión automáticamente a la hora actual
   if(!s.inicio) s.inicio = nowT();
 
+  const pFinal = puerta || puertaActual || 'Delantera';
+  puertaActual = pFinal; // sincronizar activa
+
   const n = s.people.length + 1;
   s.people.push({
     n,
+    puerta: pFinal,
     nombre: tag,
     A: nowT(),
     B: '',
@@ -363,8 +390,18 @@ function entradaRapida(tag=''){
   });
   save();
   vib(40);
-  beep(1100, .06);
-  toast(`Entrada #${n} registrada`);
+  beep(pFinal === 'Trasera' ? 1400 : 1100, .06);
+  toast(`Entrada #${n} (${pFinal}) registrada`);
+  render();
+}
+
+function togglePuertaPersona(n){
+  const s = cur();
+  const p = s.people.find(x => x.n === n);
+  if(!p) return;
+  p.puerta = (p.puerta === 'Trasera') ? 'Delantera' : 'Trasera';
+  save();
+  toast(`Persona #${n}: Puerta cambiada a ${p.puerta}`);
   render();
 }
 
@@ -412,7 +449,8 @@ function setObsPersona(n, obs){
 function deshacerUltima(){
   const s = cur();
   if(!s.people.length) return;
-  if(!confirm(`¿Eliminar la última llegada (#${s.people.length})?`)) return;
+  const ult = s.people[s.people.length - 1];
+  if(!confirm(`¿Eliminar la última llegada (#${ult.n} - ${ult.puerta||'Delantera'})?`)) return;
   s.people.pop();
   save();
   toast('Última llegada eliminada');
@@ -486,7 +524,7 @@ function guardarBloqueRapido(){
   render();
 }
 
-/* ================== VISTA: REGISTRO ================== */
+/* ================== VISTA: REGISTRO (CON SELECTOR DE PUERTAS) ================== */
 function vRegistro(){
   const s = cur();
   const k = calcSession(s);
@@ -516,13 +554,13 @@ function vRegistro(){
     <div class="card" style="text-align:center;padding:22px 14px;background:linear-gradient(180deg,#14201b,#1c2f25);border:2px solid var(--pri)">
       <div style="font-size:36px;margin-bottom:6px">⏱️</div>
       <h2 style="justify-content:center;margin:0 0 6px;font-size:20px">Sesión ${s.num} · Lista para Iniciar</h2>
-      <div class="muted" style="margin-bottom:16px">Bloque: <b>${esc(S.cfg.bloque)}</b> · Fecha: ${s.fecha}</div>
+      <div class="muted" style="margin-bottom:16px">Bloque: <b>${esc(S.cfg.bloque)}</b> · Accesos: <b>Delantera y Trasera</b></div>
       <button class="btn-start" onclick="iniciarSesion()">
         ▶ START · INICIAR TOMA DE DATOS
         <span>Toma la hora local exacta al pulsar</span>
       </button>
       <div class="muted" style="margin-top:12px;font-size:12px">
-        O también puedes tocar directamente "Registrar Entrada" para iniciar automáticamente.
+        O puedes tocar directamente "Registrar Entrada" para iniciar automáticamente.
       </div>
     </div>`;
   }
@@ -570,23 +608,51 @@ function vRegistro(){
     </div>`;
   }
 
-  // Barra de resumen táctil
+  // Barra de resumen táctil con desglose Delantera / Trasera
   h += `
   <div class="stats-bar">
-    <div class="stat-box"><b>${k.total}</b><span>Llegadas</span></div>
-    <div class="stat-box" style="border:1px solid var(--pri)"><b>${k.adentro}</b><span style="color:var(--pri)">Adentro</span></div>
-    <div class="stat-box"><b>${k.comp}</b><span>Salieron</span></div>
-    <div class="stat-box"><b>${dur(k.w)}</b><span>Estancia</span></div>
+    <div class="stat-box"><b>${k.total}</b><span>Total Llegadas</span></div>
+    <div class="stat-box" style="border:1px solid #1fb97866"><b style="color:#4ade80">${k.del}</b><span style="color:#4ade80">Delantera</span></div>
+    <div class="stat-box" style="border:1px solid #3b82f666"><b style="color:#60a5fa">${k.tras}</b><span style="color:#60a5fa">Trasera</span></div>
+    <div class="stat-box"><b>${k.adentro}</b><span>Adentro</span></div>
   </div>`;
 
-  // BOTÓN GIGANTE DE ENTRADA
+  // SELECTOR Y BOTONES DE ENTRADA (DELANTERA / TRASERA)
   if(!s.fin){
+    const esDel = (puertaActual === 'Delantera');
     h += `
-    <div class="tap-zone">
-      <button class="btn-entry" onclick="entradaRapida()">
-        ＋ REGISTRAR ENTRADA
-        <span>Hora de llegada automática al tocar</span>
-      </button>
+    <div class="card" style="padding:10px;margin-bottom:12px;background:var(--card2)">
+      <div style="font-size:11px;color:var(--mut);text-transform:uppercase;font-weight:700;letter-spacing:.4px;margin-bottom:4px">
+        Seleccionar puerta para registrar:
+      </div>
+
+      <!-- TABS SELECTORAS -->
+      <div class="door-switch">
+        <button class="door-tab ${esDel ? 'sel-del' : ''}" onclick="setPuerta('Delantera')">
+          🚪 Puerta Delantera (${k.del})
+        </button>
+        <button class="door-tab ${!esDel ? 'sel-tras' : ''}" onclick="setPuerta('Trasera')">
+          🚪 Puerta Trasera (${k.tras})
+        </button>
+      </div>
+
+      <!-- BOTÓN GIGANTE PRINCIPAL SEGÚN PUERTA ACTIVA -->
+      <div class="tap-zone">
+        <button class="btn-entry ${esDel ? 'btn-del' : 'btn-tras'}" onclick="entradaRapida(puertaActual)">
+          ＋ REGISTRAR ENTRADA (${puertaActual.toUpperCase()})
+          <span>Puerta ${puertaActual} · Guarda hora exacta</span>
+        </button>
+      </div>
+
+      <!-- BOTONES DE ACCESO RÁPIDO DIRECTO (1 TOQUE CUALQUIERA DE LAS DOS) -->
+      <div class="row" style="margin-top:6px;gap:8px">
+        <button class="btn sm" style="flex:1;background:var(--card);border:1px solid #1fb97888;color:#4ade80;font-weight:700;padding:11px" onclick="entradaRapida('Delantera')">
+          ＋ Delantera rápida
+        </button>
+        <button class="btn sm" style="flex:1;background:var(--card);border:1px solid #3b82f688;color:#60a5fa;font-weight:700;padding:11px" onclick="entradaRapida('Trasera')">
+          ＋ Trasera rápida
+        </button>
+      </div>
     </div>`;
   }
 
@@ -610,17 +676,20 @@ function vRegistro(){
   } else {
     adentroList.slice().reverse().forEach(p => {
       const transcurrido = nowSeg ? nowSeg - toS(p.A) : 0;
-      const badgeCls = p.C ? 'ok' : (p.B ? 'blue' : 'warn');
+      const esT = (p.puerta === 'Trasera');
 
       h += `
-      <div class="p-card ${p.B ? 'atencion' : 'cola'}">
+      <div class="p-card ${esT ? 'trasera' : ''}">
         <div class="p-top">
           <div class="row">
             <span class="p-id">#${p.n}</span>
+            <span class="badge ${esT ? 'blue' : 'ok'}" onclick="togglePuertaPersona(${p.n})" title="Toca para cambiar de puerta" style="cursor:pointer">
+              🚪 ${p.puerta||'Delantera'} ⇄
+            </span>
             <input class="p-tag-input" value="${esc(p.nombre||'')}" placeholder="Nota/Nombre (opcional)" onchange="setPersonaTag(${p.n}, this.value)">
           </div>
           <div class="p-time">
-            Llegó: <b>${p.A}</b> · <span class="badge ${badgeCls}">${dur(transcurrido)}</span>
+            Entró: <b>${p.A}</b> · <span class="badge ${p.C?'ok':(p.B?'warn':'ok')}">${dur(transcurrido)}</span>
           </div>
         </div>
 
@@ -656,6 +725,7 @@ function vRegistro(){
         <thead>
           <tr>
             <th>#</th>
+            <th>Puerta</th>
             <th>Llegada</th>
             <th>Salida</th>
             <th>Estancia</th>
@@ -667,9 +737,11 @@ function vRegistro(){
           ${s.people.slice().reverse().map(p => {
             const estancia = toS(p.A)!=null && toS(p.D)!=null ? dur(toS(p.D)-toS(p.A)) : '—';
             const atencion = toS(p.B)!=null && toS(p.C)!=null ? dur(toS(p.C)-toS(p.B)) : '—';
+            const esT = (p.puerta === 'Trasera');
             return `
             <tr>
               <td><b>#${p.n}</b> ${esc(p.nombre||'')}</td>
+              <td><span class="badge ${esT ? 'blue' : 'ok'}">${p.puerta||'Delantera'}</span></td>
               <td>${p.A||'—'}</td>
               <td>${p.D||'<span class="badge warn">Adentro</span>'}</td>
               <td>${estancia}</td>
@@ -747,22 +819,26 @@ function vResumen(){
   };
 
   const consolidados = [
-    ['Personas promedio por sesión (llegadas)', m(x=>x.total)],
+    ['Personas promedio por sesión (total)', m(x=>x.total)],
+    ['Llegadas por Puerta Delantera (promedio)', m(x=>x.del)],
+    ['Llegadas por Puerta Trasera (promedio)', m(x=>x.tras)],
+    ['% Flujo Puerta Delantera', m(x=>x.total) ? Math.round((m(x=>x.del)/m(x=>x.total))*100)+'%' : '—'],
+    ['% Flujo Puerta Trasera', m(x=>x.total) ? Math.round((m(x=>x.tras)/m(x=>x.total))*100)+'%' : '—'],
+    ['Frecuencia total de llegada λ (pers/min)', m(x=>x.lambda)],
+    ['Frecuencia Spawner Delantera (pers/min)', m(x=>x.lambdaDel)],
+    ['Frecuencia Spawner Trasera (pers/min)', m(x=>x.lambdaTras)],
     ['Tiempo promedio de recorrido en bloque (D−A)', mm(x=>x.w)],
     ['Tiempo promedio de espera en cola (B−A)', mm(x=>x.wq)],
     ['Tiempo promedio de atención en ventanilla (C−B)', mm(x=>x.ws)],
     ['Capacidad del espacio (espera / aforo)', (S.cfg.capEspera||'—')+' / '+(S.cfg.aforo||'—')],
-    ['Frecuencia de llegada λ (personas/minuto)', m(x=>x.lambda)],
-    ['Frecuencia de llegada (personas/hora)', r2(m(x=>x.lambda)*60)],
-    ['Tiempo promedio entre llegadas (s)', m(x=>x.inter)+' s'],
     ['Cola promedio observada', m(x=>x.colaProm)],
     ['Utilización promedio de servidores ρ', m(x=>x.util) ? Math.round(m(x=>x.util)*100)+'%' : '—']
   ];
 
   return `
   <div class="card">
-    <h2>🧩 Consolidación de Datos para Unity (Todas las sesiones: ${S.sessions.length})</h2>
-    <p class="muted">Aquí tienes directamente la tabla solicitada para calibrar tu modelo en Unity:</p>
+    <h2>🧩 Consolidación y Parámetros para Unity (Todas las sesiones: ${S.sessions.length})</h2>
+    <p class="muted">Parámetros listos para configurar tus generadores de agentes (Spawners) Delantero y Trasero en Unity:</p>
     <table>
       <thead>
         <tr>
@@ -784,16 +860,17 @@ function vResumen(){
   </div>
 
   <div class="card">
-    <h2>📊 Resumen de la Sesión Actual (#${s.num})</h2>
+    <h2>📊 Resumen Sesión Actual (#${s.num})</h2>
     <table>
       <tr><td style="text-align:left">Estado</td><td><b>${s.fin ? 'Cerrada ('+s.inicio+' a '+s.fin+')' : (s.inicio ? 'En curso (desde '+s.inicio+')' : 'Sin iniciar')}</b></td></tr>
-      <tr><td style="text-align:left">Total de llegadas registradas</td><td><b>${k.total}</b></td></tr>
+      <tr><td style="text-align:left">Llegadas Puerta Delantera</td><td><b style="color:#4ade80">${k.del}</b></td></tr>
+      <tr><td style="text-align:left">Llegadas Puerta Trasera</td><td><b style="color:#60a5fa">${k.tras}</b></td></tr>
+      <tr><td style="text-align:left">Total de llegadas</td><td><b>${k.total}</b></td></tr>
       <tr><td style="text-align:left">Total salidas completas</td><td><b>${k.comp}</b></td></tr>
-      <tr><td style="text-align:left">Personas aún en el bloque</td><td><b>${k.adentro}</b></td></tr>
+      <tr><td style="text-align:left">Personas aún adentro</td><td><b>${k.adentro}</b></td></tr>
       <tr><td style="text-align:left">Tiempo prom. de recorrido (D−A)</td><td><b>${dur(k.w)}</b></td></tr>
       <tr><td style="text-align:left">Tiempo prom. entre llegadas</td><td><b>${dur(k.inter)}</b></td></tr>
       <tr><td style="text-align:left">Cortes de 10 min realizados</td><td><b>${k.cortes} / 6</b></td></tr>
-      <tr><td style="text-align:left">Abandonos (AB)</td><td><b>${k.ab}</b></td></tr>
     </table>
   </div>`;
 }
@@ -803,7 +880,7 @@ function vDatos(){
   return `
   <div class="card">
     <h2>💾 Descargar Archivos para la Entrega</h2>
-    <p class="muted">Genera el archivo oficial <b>${fname('xlsx')}</b> con las 5 hojas requeridas por la universidad conteniendo todas tus sesiones (${S.sessions.length}).</p>
+    <p class="muted">Genera el archivo oficial <b>${fname('xlsx')}</b> con las 5 hojas requeridas por la universidad conteniendo todas tus sesiones (${S.sessions.length}). Incluye la columna de Puerta de Entrada (Delantera / Trasera).</p>
     <div class="row" style="margin-bottom:12px">
       <button class="btn pri" onclick="exportXLSX()">⬇ Descargar Excel (.xlsx)</button>
       <button class="btn" onclick="exportCSV()">⬇ CSV</button>
@@ -816,10 +893,12 @@ function vDatos(){
     <h2>Sesiones Guardadas (${S.sessions.length})</h2>
     ${S.sessions.map(s => {
       const durac = s.inicio && s.fin ? dur(toS(s.fin)-toS(s.inicio)) : (s.inicio ? 'En curso' : 'Sin iniciar');
+      const del = s.people.filter(p=>(p.puerta||'Delantera')==='Delantera').length;
+      const tras = s.people.filter(p=>p.puerta==='Trasera').length;
       return `
       <div class="row" style="justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)">
         <div>
-          <b>Sesión ${s.num}</b> · ${s.fecha} · ${s.people.length} pers · <span class="badge ${s.fin?'ok':(s.inicio?'warn':'')}">${durac}</span>
+          <b>Sesión ${s.num}</b> · ${s.fecha} · ${s.people.length} pers (Del: ${del} · Tras: ${tras}) · <span class="badge ${s.fin?'ok':(s.inicio?'warn':'')}">${durac}</span>
         </div>
         <div class="row">
           <button class="btn sm" onclick="cambiarSesion(${s.id});tab='registro';render()">Abrir</button>
@@ -845,7 +924,7 @@ function vBloque(){
       ${f('zona','Zona','Zona 1')}
       ${f('est1','Estudiante (Tú)','Balmes')}
       ${f('est2','Compañero (opcional)','')}
-      ${f('punto','Punto exacto observado','Entrada principal / Bloque Adm A')}
+      ${f('punto','Punto exacto observado','Puerta delantera y trasera / Bloque Adm A')}
       ${f('horario','Horario','Hora pico')}
     </div>
   </div>
@@ -855,7 +934,7 @@ function vBloque(){
     <div class="grid">
       ${f('c','Número de servidores / ventanillas (c)','1','number')}
       ${sel('iguales','¿Servidores iguales?',['Sí','No'])}
-      ${f('accesos','Accesos del bloque','1 acceso')}
+      ${f('accesos','Accesos del bloque','2 accesos (Delantera y Trasera)')}
       ${sel('disciplina','Disciplina de cola',['FIFO','Prioridad','Sin orden'])}
       ${sel('fila','Tipo de fila',['Una sola fila','Una por servidor'])}
       ${f('capEspera','Capacidad de espera (personas)','20','number')}
@@ -884,6 +963,7 @@ function rowsLlegadas(){
       'Día': p.s.dia,
       'Bloque': S.cfg.bloque,
       'N°': p.n,
+      'Puerta de Entrada': p.puerta || 'Delantera',
       'Etiqueta / Nota': p.nombre || '',
       'A. Llegada': p.A,
       'B. Inicio atención': p.B,
@@ -924,7 +1004,7 @@ function exportXLSX(){
   ];
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(f1), 'Bloque (F1)');
 
-  // Hoja 2: Registro
+  // Hoja 2: Registro con Puerta de Entrada
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rowsLlegadas()), 'Registro (Hoja 3)');
 
   // Hoja 3: Cortes cada 10 min
@@ -939,17 +1019,21 @@ function exportXLSX(){
   })));
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rCortes), 'Cortes (F3)');
 
-  // Hoja 4: Resumen de sesiones con horas de inicio y fin
+  // Hoja 4: Resumen de sesiones con horas de inicio, fin y desglose de puertas
   const res = [
     ['Indicador', ...S.sessions.map(s => 'Sesión ' + s.num)],
     ['Fecha', ...S.sessions.map(s => s.fecha)],
     ['Hora inicio (START)', ...S.sessions.map(s => s.inicio || '—')],
     ['Hora fin (CIERRE)', ...S.sessions.map(s => s.fin || '—')],
     ['Duración', ...S.sessions.map(s => s.inicio && s.fin ? dur(toS(s.fin)-toS(s.inicio)) : '—')],
+    ['Llegadas Puerta Delantera', ...S.sessions.map(s => calcSession(s).del)],
+    ['Llegadas Puerta Trasera', ...S.sessions.map(s => calcSession(s).tras)],
     ['Total llegadas', ...S.sessions.map(s => s.people.length)],
     ['Salidas completas', ...S.sessions.map(s => calcSession(s).comp)],
     ['Tiempo prom. recorrido', ...S.sessions.map(s => dur(calcSession(s).w))],
-    ['Tasa de llegada (pers/min)', ...S.sessions.map(s => r2(calcSession(s).lambda))]
+    ['Tasa total (pers/min)', ...S.sessions.map(s => r2(calcSession(s).lambda))],
+    ['Tasa Spawner Delantera (pers/min)', ...S.sessions.map(s => r2(calcSession(s).lambdaDel))],
+    ['Tasa Spawner Trasera (pers/min)', ...S.sessions.map(s => r2(calcSession(s).lambdaTras))]
   ];
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(res), 'Resumen Sesiones (F4)');
 
@@ -958,11 +1042,15 @@ function exportXLSX(){
   const m = f => r2(avg(ks.map(f).filter(x=>x!=null&&!isNaN(x))));
   const tUnity = [
     ['Variable para Unity', 'Datos Observados', 'Valor utilizado en Unity'],
-    ['Personas promedio', m(x=>x.total), c.unity['Personas promedio por sesión (llegadas)']||m(x=>x.total)],
+    ['Personas promedio (Total)', m(x=>x.total), c.unity['Personas promedio por sesión (total)']||m(x=>x.total)],
+    ['Llegadas Puerta Delantera (promedio)', m(x=>x.del), c.unity['Llegadas por Puerta Delantera (promedio)']||m(x=>x.del)],
+    ['Llegadas Puerta Trasera (promedio)', m(x=>x.tras), c.unity['Llegadas por Puerta Trasera (promedio)']||m(x=>x.tras)],
+    ['Tasa Spawner Delantera (pers/min)', m(x=>x.lambdaDel), c.unity['Frecuencia Spawner Delantera (pers/min)']||m(x=>x.lambdaDel)],
+    ['Tasa Spawner Trasera (pers/min)', m(x=>x.lambdaTras), c.unity['Frecuencia Spawner Trasera (pers/min)']||m(x=>x.lambdaTras)],
     ['Tiempo promedio de recorrido', r2(m(x=>x.w)/60)+' min', c.unity['Tiempo promedio de recorrido en bloque (D−A)']||r2(m(x=>x.w)/60)+' min'],
     ['Tiempo promedio de espera', r2(m(x=>x.wq)/60)+' min', c.unity['Tiempo promedio de espera en cola (B−A)']||'0 min'],
     ['Capacidad del espacio', c.capEspera + ' / ' + c.aforo, c.capEspera],
-    ['Frecuencia de llegada', m(x=>x.lambda)+' pers/min', c.unity['Frecuencia de llegada λ (personas/minuto)']||m(x=>x.lambda)]
+    ['Frecuencia total de llegada', m(x=>x.lambda)+' pers/min', c.unity['Frecuencia total de llegada λ (pers/min)']||m(x=>x.lambda)]
   ];
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(tUnity), 'Consolidación Unity');
 
