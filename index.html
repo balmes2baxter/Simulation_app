@@ -2,354 +2,900 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0b3d2e">
-<title>Registro de Bloques · Uniguajira</title>
+<title>Registro Bloque Administrativo · Uniguajira</title>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
-:root{--bg:#0f1714;--card:#18231f;--card2:#1f2d28;--txt:#e8f1ec;--mut:#8fa69b;--pri:#1fb978;--pri2:#16935f;--warn:#f0b429;--bad:#e5484d;--blue:#3b82f6;--bd:#2a3b34}
+:root{--bg:#0c1411;--card:#14201b;--card2:#1c2d26;--card3:#243a31;--txt:#e9f3ee;--mut:#8fa69b;--pri:#1fb978;--pri2:#15915d;--warn:#f0b429;--bad:#e5484d;--blue:#3b82f6;--purple:#a855f7;--bd:#263830}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--txt);padding-bottom:80px}
-header{position:sticky;top:0;z-index:10;background:#0b3d2e;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px;box-shadow:0 2px 8px #0006}
-header h1{font-size:15px;margin:0;line-height:1.2}
-header small{color:#b6d8c8;font-size:12px}
-#clock{font:700 22px ui-monospace,Consolas,monospace}
-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0b1310;border-top:1px solid var(--bd);z-index:10}
-nav button{flex:1;background:none;border:0;color:var(--mut);padding:10px 2px 12px;font-size:12px;cursor:pointer}
-nav button b{display:block;font-size:20px;margin-bottom:2px}
-nav button.on{color:var(--pri)}
-main{max-width:900px;margin:0 auto;padding:12px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
-h2{font-size:17px;margin:0 0 10px}
-h3{font-size:14px;margin:14px 0 8px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
-label{display:block;font-size:12px;color:var(--mut);margin:8px 0 3px}
-input,select,textarea{width:100%;background:var(--card2);border:1px solid var(--bd);color:var(--txt);border-radius:9px;padding:10px;font-size:15px}
-textarea{min-height:60px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 12px}
-.btn{background:var(--card2);color:var(--txt);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;font-size:14px;cursor:pointer;font-weight:600}
-.btn.pri{background:var(--pri);border-color:var(--pri);color:#04150d}
+body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--txt);padding-bottom:84px;user-select:none}
+header{position:sticky;top:0;z-index:20;background:#09251c;border-bottom:1px solid var(--bd);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.hdr-main{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.bloque-chip{display:inline-flex;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--bd);border-radius:20px;padding:4px 10px;font-size:13px;font-weight:700;color:var(--pri);max-width:100%;cursor:pointer}
+.bloque-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#clock{font:700 20px ui-monospace,Consolas,monospace;color:#a3e6cb}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#091511;border-top:1px solid var(--bd);z-index:30}
+nav button{flex:1;background:none;border:0;color:var(--mut);padding:8px 2px 10px;font-size:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button b{font-size:18px}
+nav button.on{color:var(--pri);font-weight:700}
+main{max-width:720px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:12px}
+h2{font-size:16px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center}
+label{display:block;font-size:12px;color:var(--mut);margin:6px 0 3px}
+input,select,textarea{width:100%;background:var(--card2);border:1px solid var(--bd);color:var(--txt);border-radius:8px;padding:9px;font-size:14px;user-select:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px 12px}
+.btn{background:var(--card2);color:var(--txt);border:1px solid var(--bd);border-radius:10px;padding:9px 12px;font-size:13px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.pri{background:var(--pri);border-color:var(--pri);color:#03140c}
 .btn.bad{background:var(--bad);border-color:var(--bad);color:#fff}
 .btn.warn{background:var(--warn);border-color:var(--warn);color:#241a00}
 .btn.blue{background:var(--blue);border-color:var(--blue);color:#fff}
-.btn.sm{padding:6px 9px;font-size:12px}
+.btn.sm{padding:5px 8px;font-size:11px;border-radius:7px}
 .btn:active{transform:scale(.97)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.big{width:100%;padding:34px 10px;font-size:30px;font-weight:800;border-radius:18px;background:linear-gradient(180deg,#25d08a,#16935f);border:0;color:#03140c;cursor:pointer;box-shadow:0 6px 18px #1fb97855;user-select:none}
-.big:active{transform:scale(.98);filter:brightness(1.1)}
-.big small{display:block;font-size:14px;font-weight:600;opacity:.8;margin-top:4px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin:10px 0}
-.stat{background:var(--card2);border-radius:10px;padding:10px;text-align:center}
-.stat b{display:block;font-size:22px}
-.stat span{font-size:11px;color:var(--mut)}
-.follow{background:var(--card2);border-left:4px solid var(--warn);border-radius:10px;padding:10px;margin-bottom:8px}
-.follow .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;flex-wrap:wrap}
-.follow .times{font:13px ui-monospace,Consolas,monospace;color:var(--mut)}
-.follow .next{flex:1;min-width:150px;padding:14px;font-size:16px}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{border-bottom:1px solid var(--bd);padding:5px 4px;text-align:center}
-th{color:var(--mut);font-weight:600;position:sticky;top:0;background:var(--card)}
-tr.seg td{background:#2a2a14}
-td input,td select{padding:5px;font-size:13px;font-family:ui-monospace,Consolas,monospace;min-width:84px;text-align:center}
-td select{min-width:58px}
-.tbl{overflow:auto;max-height:60vh}
-.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;background:var(--card2);color:var(--mut)}
-.pill.ok{background:#1fb97833;color:#5be0a6}.pill.no{background:#e5484d33;color:#ff8a8d}
-.alert{background:var(--warn);color:#241a00;padding:12px;border-radius:12px;font-weight:700;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;animation:pulse 1s infinite}
+
+/* BOTONES GIGANTES DE ENTRADA */
+.tap-zone{display:grid;grid-template-columns:1fr;gap:10px;margin:10px 0}
+.btn-entry{width:100%;padding:26px 12px;font-size:24px;font-weight:800;border-radius:16px;background:linear-gradient(180deg,#2ad38d,#15935d);border:0;color:#02140a;cursor:pointer;box-shadow:0 6px 18px #1fb97844;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.btn-entry:active{transform:scale(.98);filter:brightness(1.1)}
+.btn-entry span{font-size:12px;font-weight:600;opacity:.85;letter-spacing:.3px}
+
+/* TARJETAS DE PERSONAS ADENTRO */
+.p-card{background:var(--card2);border:1px solid var(--bd);border-left:4px solid var(--pri);border-radius:12px;padding:10px;margin-bottom:8px}
+.p-card.atencion{border-left-color:var(--blue)}
+.p-card.cola{border-left-color:var(--warn)}
+.p-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:6px}
+.p-id{font-weight:800;font-size:15px;color:var(--txt)}
+.p-time{font:12px ui-monospace,Consolas,monospace;color:#a7c4b7}
+.p-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.p-tag-input{background:none;border:0;border-bottom:1px dashed var(--bd);color:#cbdad2;font-size:12px;padding:2px 4px;width:130px}
+.p-tag-input:focus{outline:0;border-bottom-color:var(--pri)}
+
+.badge{display:inline-block;padding:2px 7px;border-radius:99px;font-size:11px;font-weight:700}
+.badge.ok{background:#1fb97825;color:#4ade80}
+.badge.warn{background:#f0b42925;color:#fbbf24}
+.badge.blue{background:#3b82f625;color:#60a5fa}
+.badge.bad{background:#e5484d25;color:#f87171}
+
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}
+.stat-box{background:var(--card2);border-radius:10px;padding:8px 4px;text-align:center}
+.stat-box b{display:block;font-size:20px;color:var(--txt)}
+.stat-box span{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.3px}
+
+.alert{background:var(--warn);color:#241a00;padding:10px 12px;border-radius:10px;font-weight:700;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:6px;animation:pulse 1s infinite}
 @keyframes pulse{50%{filter:brightness(1.2)}}
-.step{display:flex;align-items:center;gap:8px}
-.step button{width:48px;height:48px;font-size:24px;border-radius:12px}
-.step b{min-width:46px;text-align:center;font-size:26px}
-.check{padding:6px 0}
+
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{border-bottom:1px solid var(--bd);padding:6px 4px;text-align:center}
+th{color:var(--mut);font-weight:600;background:var(--card)}
+.tbl{overflow:auto;max-height:50vh}
+.toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:#000000dd;border:1px solid #ffffff22;color:#fff;padding:8px 16px;border-radius:99px;font-size:13px;z-index:99;pointer-events:none}
+.step{display:flex;align-items:center;gap:6px}
+.step button{width:42px;height:42px;font-size:22px;border-radius:10px}
+.step b{min-width:36px;text-align:center;font-size:22px}
 .muted{color:var(--mut);font-size:12px}
-.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#000c;padding:10px 16px;border-radius:99px;font-size:14px;z-index:99;pointer-events:none}
+.modal{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal-body{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;width:100%;max-width:400px}
 </style>
 </head>
 <body>
 <header>
-  <div><h1 id="hTitle">Registro de Bloques</h1><small id="hSub">Configure el bloque</small></div>
+  <div class="hdr-main">
+    <div class="bloque-chip" onclick="abrirCambioBloque()" title="Cambiar bloque">
+      🏢 <span id="hBloque">Bloque Administrativo A</span> ✏️
+    </div>
+  </div>
   <div id="clock">--:--:--</div>
 </header>
+
 <main id="app"></main>
+
 <nav>
-  <button data-t="bloque"><b>🏢</b>Bloque</button>
-  <button data-t="registro"><b>⏱️</b>Registro</button>
+  <button data-t="registro" class="on"><b>⏱️</b>Registro</button>
   <button data-t="cortes"><b>📸</b>Cortes</button>
-  <button data-t="resumen"><b>📊</b>Resumen</button>
-  <button data-t="datos"><b>💾</b>Datos</button>
+  <button data-t="resumen"><b>📊</b>Métricas</button>
+  <button data-t="datos"><b>💾</b>Exportar</button>
+  <button data-t="bloque"><b>⚙️</b>Bloque</button>
 </nav>
+
+<div id="modalSlot"></div>
+
 <script>
-/* ================== ESTADO ================== */
-const KEY='regBloques_v1';
-const defCfg={zona:'',bloque:'Bloque Administrativo A',est1:'',est2:'',punto:'',horario:'',c:1,iguales:'Sí',accesos:'',disciplina:'FIFO',fila:'Una sola fila',capEspera:'',turnos:'',abandono:'No',abandonoHora:'',aforo:'',seguirCada:2,unity:{}};
-let S=JSON.parse(localStorage.getItem(KEY)||'null')||{cfg:{...defCfg},sessions:[],cur:null};
-S.cfg={...defCfg,...S.cfg};
-let tab=S.cfg.zona||S.cfg.bloque!==defCfg.bloque?'registro':'bloque';
-const save=()=>localStorage.setItem(KEY,JSON.stringify(S));
-const cur=()=>S.sessions.find(s=>s.id===S.cur);
-const $=s=>document.querySelector(s);
-const pad=n=>String(n).padStart(2,'0');
-const nowT=()=>{const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())};
-const toS=t=>{if(!t||!/^\d{1,2}:\d{2}(:\d{2})?$/.test(t))return null;const p=t.split(':').map(Number);return p[0]*3600+p[1]*60+(p[2]||0)};
-const fromS=s=>{s=((s%86400)+86400)%86400;return pad(Math.floor(s/3600))+':'+pad(Math.floor(s%3600/60))+':'+pad(Math.floor(s%60))};
-const dur=s=>s==null||isNaN(s)?'—':(s<0?'-':'')+Math.floor(Math.abs(s)/60)+'m '+pad(Math.round(Math.abs(s)%60))+'s';
-const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
-const sd=a=>{if(a.length<2)return null;const m=avg(a);return Math.sqrt(a.reduce((x,y)=>x+(y-m)**2,0)/(a.length-1))};
-const r2=x=>x==null||isNaN(x)?'':Math.round(x*100)/100;
-const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),1400)}
-function beep(f=880,d=.15){try{const a=new (window.AudioContext||window.webkitAudioContext)();const o=a.createOscillator(),g=a.createGain();o.frequency.value=f;o.connect(g);g.connect(a.destination);g.gain.value=.2;o.start();o.stop(a.currentTime+d)}catch(e){}}
-function vib(p=40){if(navigator.vibrate)navigator.vibrate(p)}
+/* ================== CONFIGURACIÓN INICIAL ================== */
+const KEY = 'regBloques_v2';
+const defCfg = {
+  bloque: 'Bloque Administrativo A',
+  zona: 'Zona 1',
+  est1: 'Balmes',
+  est2: '',
+  punto: 'Puerta principal / Ventanilla',
+  horario: 'Hora pico',
+  c: 1,
+  iguales: 'Sí',
+  accesos: '1 acceso principal',
+  disciplina: 'FIFO',
+  fila: 'Una sola fila',
+  capEspera: '20',
+  turnos: 'Jornada continua',
+  abandono: 'No',
+  abandonoHora: '0',
+  aforo: '50',
+  seguirCada: 1,
+  unity: {}
+};
+
+let S = JSON.parse(localStorage.getItem(KEY) || 'null');
+if(!S){
+  const old = localStorage.getItem('regBloques_v1');
+  if(old){
+    try{ S = JSON.parse(old); }catch(e){}
+  }
+}
+if(!S){
+  S = { cfg: {...defCfg}, sessions: [], cur: null };
+}
+S.cfg = { ...defCfg, ...S.cfg };
+
+// Sesión automática inmediata si no hay ninguna
+const dNow = new Date();
+const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+if(!S.sessions || S.sessions.length === 0){
+  const s0 = {
+    id: Date.now(),
+    num: 1,
+    fecha: dNow.toISOString().slice(0,10),
+    dia: dias[dNow.getDay()],
+    inicio: '',
+    fin: '',
+    people: [],
+    cortes: [],
+    clima: 'Normal',
+    anormal: '',
+    franja: 'Hora pico'
+  };
+  S.sessions = [s0];
+  S.cur = s0.id;
+} else if(!S.cur){
+  S.cur = S.sessions[0].id;
+}
+
+let tab = 'registro'; // SIEMPRE arranca directo a registrar
+
+const save = () => localStorage.setItem(KEY, JSON.stringify(S));
+const cur = () => S.sessions.find(s => s.id === S.cur) || S.sessions[0];
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2, '0');
+const nowT = () => {
+  const d = new Date();
+  return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+};
+const toS = t => {
+  if(!t || !/^\d{1,2}:\d{2}(:\d{2})?$/.test(t)) return null;
+  const p = t.split(':').map(Number);
+  return p[0]*3600 + p[1]*60 + (p[2]||0);
+};
+const fromS = s => {
+  s = ((s%86400)+86400)%86400;
+  return pad(Math.floor(s/3600)) + ':' + pad(Math.floor(s%3600/60)) + ':' + pad(Math.floor(s%60));
+};
+const dur = s => s == null || isNaN(s) ? '—' : (s < 0 ? '-' : '') + Math.floor(Math.abs(s)/60) + 'm ' + pad(Math.round(Math.abs(s)%60)) + 's';
+const avg = a => a.length ? a.reduce((x,y)=>x+y,0)/a.length : null;
+const sd = a => {
+  if(a.length < 2) return null;
+  const m = avg(a);
+  return Math.sqrt(a.reduce((x,y)=>x+(y-m)**2,0)/(a.length-1));
+};
+const r2 = x => x == null || isNaN(x) ? '' : Math.round(x*100)/100;
+const esc = s => String(s??'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function toast(m){
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = m;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 1400);
+}
+function beep(f=880, d=.12){
+  try{
+    const a = new (window.AudioContext||window.webkitAudioContext)();
+    const o = a.createOscillator(), g = a.createGain();
+    o.frequency.value = f;
+    o.connect(g);
+    g.connect(a.destination);
+    g.gain.value = .18;
+    o.start();
+    o.stop(a.currentTime+d);
+  }catch(e){}
+}
+function vib(p=35){ if(navigator.vibrate) navigator.vibrate(p); }
 
 /* ================== CÁLCULOS ================== */
 function calcSession(s){
-  const c=+S.cfg.c||1;
-  const P=s.people;
-  const arr=P.filter(p=>p.obs!=='PE'&&toS(p.A)!=null).map(p=>toS(p.A)).sort((a,b)=>a-b);
-  const inter=[];for(let i=1;i<arr.length;i++)inter.push(arr[i]-arr[i-1]);
-  const comp=P.filter(p=>p.seg&&[p.A,p.B,p.C,p.D].every(t=>toS(t)!=null));
-  const wq=comp.map(p=>toS(p.B)-toS(p.A)),ws=comp.map(p=>toS(p.C)-toS(p.B)),wx=comp.map(p=>toS(p.D)-toS(p.C)),w=comp.map(p=>toS(p.D)-toS(p.A));
-  const ini=toS(s.inicio),fin=toS(s.fin)??(arr.length?arr[arr.length-1]:null);
-  const durMin=ini!=null&&fin!=null?(fin-ini)/60:null;
-  const colas=s.cortes.map(k=>+k.cola).filter(x=>!isNaN(x));
-  const ocup=s.cortes.map(k=>+k.ocup).filter(x=>!isNaN(x));
-  return {total:P.length,validas:arr.length,comp:comp.length,pe:P.filter(p=>p.obs==='PE').length,ab:P.filter(p=>p.obs==='AB').length,pr:P.filter(p=>p.obs==='PR').length,
-    durMin,lambda:durMin?arr.length/durMin:null,inter:avg(inter),interSd:sd(inter),wq:avg(wq),wqSd:sd(wq),ws:avg(ws),wsSd:sd(ws),wx:avg(wx),w:avg(w),wSd:sd(w),
-    colaProm:avg(colas),colaMax:colas.length?Math.max(...colas):null,util:ocup.length?avg(ocup)/c:null,cortes:s.cortes.length};
-}
-function checks(s){
-  const seg=s.people.filter(p=>p.seg&&p.obs!=='PE'&&p.obs!=='AB');
-  const orden=seg.every(p=>{const t=[p.A,p.B,p.C,p.D].map(toS).filter(x=>x!=null);return t.every((x,i)=>!i||x>=t[i-1])});
-  const cero=seg.every(p=>!(toS(p.B)!=null&&toS(p.C)!=null&&toS(p.C)-toS(p.B)<=0));
-  const sumCortes=s.cortes.reduce((a,k)=>a+(+k.llegadas||0),0);
-  const servOk=seg.filter(p=>toS(p.B)!=null).every(p=>p.serv);
-  const k=calcSession(s);
-  return [
-    ['En todas las filas se cumple A ≤ B ≤ C ≤ D',orden],
-    ['Ningún tiempo de atención quedó en cero',cero],
-    [`Llegadas Formato 3 (${sumCortes}) coinciden con Hoja 3 (${s.people.length})`,s.cortes.length>0&&sumCortes===s.people.length],
-    ['Columna Serv. diligenciada en filas seguidas',servOk],
-    [`Mínimo 80 llegadas (${k.total})`,k.total>=80],
-    [`Mínimo 30 atenciones completas (${k.comp})`,k.comp>=30],
-    [`Mínimo 6 cortes de 10 min (${k.cortes})`,k.cortes>=6],
-  ];
+  if(!s) return {};
+  const c = +S.cfg.c || 1;
+  const P = s.people || [];
+  const arr = P.filter(p=>p.obs!=='PE' && toS(p.A)!=null).map(p=>toS(p.A)).sort((a,b)=>a-b);
+  const inter = [];
+  for(let i=1; i<arr.length; i++) inter.push(arr[i]-arr[i-1]);
+
+  const comp = P.filter(p => toS(p.A)!=null && toS(p.D)!=null);
+  const w = comp.map(p => toS(p.D) - toS(p.A));
+  
+  const conAtencion = P.filter(p => toS(p.A)!=null && toS(p.B)!=null && toS(p.C)!=null);
+  const wq = conAtencion.map(p => toS(p.B) - toS(p.A));
+  const ws = conAtencion.map(p => toS(p.C) - toS(p.B));
+
+  const ini = toS(s.inicio) ?? (arr.length ? arr[0] : null);
+  const fin = toS(s.fin) ?? (toS(nowT()));
+  const durMin = ini!=null && fin!=null ? Math.max(1, (fin-ini)/60) : null;
+
+  const colas = (s.cortes||[]).map(k=>+k.cola).filter(x=>!isNaN(x));
+  const ocup = (s.cortes||[]).map(k=>+k.ocup).filter(x=>!isNaN(x));
+
+  const adentro = P.filter(p => p.A && !p.D && p.obs !== 'AB' && p.obs !== 'PE').length;
+
+  return {
+    total: P.length,
+    validas: arr.length,
+    comp: comp.length,
+    adentro,
+    pe: P.filter(p=>p.obs==='PE').length,
+    ab: P.filter(p=>p.obs==='AB').length,
+    pr: P.filter(p=>p.obs==='PR').length,
+    durMin,
+    lambda: durMin ? arr.length/durMin : null,
+    inter: avg(inter),
+    interSd: sd(inter),
+    wq: avg(wq),
+    ws: avg(ws),
+    w: avg(w),
+    wSd: sd(w),
+    colaProm: avg(colas),
+    colaMax: colas.length ? Math.max(...colas) : null,
+    util: ocup.length ? avg(ocup)/c : null,
+    cortes: (s.cortes||[]).length
+  };
 }
 
-/* ================== ACCIONES ================== */
-function nuevaSesion(){
-  const n=S.sessions.length+1;
-  const d=new Date();const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  const s={id:Date.now(),num:Math.min(n,3)===n?n:n,fecha:d.toISOString().slice(0,10),dia:dias[d.getDay()],inicio:'',fin:'',people:[],cortes:[],clima:'',anormal:'',franja:''};
-  S.sessions.push(s);S.cur=s.id;save();render();
-}
-function iniciar(){const s=cur();s.inicio=nowT();s.fin='';save();beep(660);render()}
-function finalizar(){if(!confirm('¿Finalizar la sesión?'))return;const s=cur();s.fin=nowT();save();render()}
-function llegada(){
-  const s=cur();if(!s)return;
-  if(!s.inicio){s.inicio=nowT()}
-  const n=s.people.length+1,k=+S.cfg.seguirCada||0;
-  s.people.push({n,A:nowT(),B:'',C:'',D:'',serv:'',obs:'',seg:k>0&&(n%k===0||k===1)});
-  save();vib(30);beep(1200,.05);render();
-}
-function deshacer(){const s=cur();if(!s.people.length)return;if(!confirm('¿Borrar la última llegada (N° '+s.people.length+')?'))return;s.people.pop();save();render()}
-function marcar(n,campo){const p=cur().people[n-1];p[campo]=nowT();if(campo==='B'&&!p.serv&&(+S.cfg.c||1)===1)p.serv='1';save();vib(30);render()}
-function setP(n,campo,v){const p=cur().people[n-1];if(campo==='seg')p.seg=v;else p[campo]=v;save();if(campo!=='A'&&campo!=='B'&&campo!=='C'&&campo!=='D')render()}
-function setObs(n,v){const p=cur().people[n-1];p.obs=p.obs===v?'':v;save();render()}
-function corte(){
-  const s=cur();const h=nowT();const prev=s.cortes.length?toS(s.cortes[s.cortes.length-1].hora):toS(s.inicio);const hs=toS(h);
-  const lleg=s.people.filter(p=>{const a=toS(p.A);return a!=null&&a>prev&&a<=hs}).length;
-  const c=+S.cfg.c||1;
-  const enAt=s.people.filter(p=>p.seg&&p.B&&!p.C).length;
-  s.cortes.push({n:s.cortes.length+1,hora:h,llegadas:lleg,cola:0,ocup:Math.min(enAt,c),libres:c-Math.min(enAt,c)});
-  save();beep(500,.3);tab='cortes';render();
-}
-function setCorte(i,campo,v){const s=cur(),k=s.cortes[i],c=+S.cfg.c||1;k[campo]=v;if(campo==='ocup')k.libres=Math.max(0,c-(+v||0));save()}
-function stepCorte(i,campo,d){const s=cur(),k=s.cortes[i];setCorte(i,campo,Math.max(0,(+k[campo]||0)+d));render()}
-function delCorte(i){if(!confirm('¿Eliminar corte?'))return;const s=cur();s.cortes.splice(i,1);s.cortes.forEach((k,j)=>k.n=j+1);save();render()}
-
-/* ================== VISTAS ================== */
-function vBloque(){
-  const c=S.cfg,f=(k,l,ph='',type='text')=>`<div><label>${l}</label><input type="${type}" value="${esc(c[k])}" placeholder="${ph}" onchange="S.cfg['${k}']=this.value;save();hdr()"></div>`;
-  const sel=(k,l,ops)=>`<div><label>${l}</label><select onchange="S.cfg['${k}']=this.value;save()">${ops.map(o=>`<option ${c[k]===o?'selected':''}>${o}</option>`).join('')}</select></div>`;
-  return `<div class="card"><h2>🏢 Hoja 2 · Identificación del bloque</h2><div class="grid">
-  ${f('bloque','Bloque','Bloque Administrativo A')}${f('zona','Zona','Zona 1')}
-  ${f('est1','Estudiante 1 (columna A)')}${f('est2','Estudiante 2 (B, C, D + cortes)')}
-  ${f('punto','Punto exacto observado','Ventanilla de admisiones')}${f('horario','Horario del punto','8:00 – 12:00')}
-  </div></div>
-  <div class="card"><h2>⚙️ Formato 1 · Parámetros estructurales</h2><div class="grid">
-  ${f('c','Número de servidores (c)','1','number')}${sel('iguales','¿Servidores iguales?',['Sí','No'])}
-  ${f('accesos','Accesos del bloque (cuántos; cuál observa)','2; puerta principal')}${sel('disciplina','Disciplina de la cola',['FIFO','Prioridad','Sin orden'])}
-  ${sel('fila','¿Una sola fila o una por servidor?',['Una sola fila','Una por servidor'])}${f('capEspera','Capacidad zona de espera (personas)','','number')}
-  ${f('turnos','Turnos del personal')}${sel('abandono','¿Se va gente al ver la fila?',['No','Sí'])}
-  ${f('abandonoHora','Si sí, ¿cuántas por hora?','','number')}${f('aforo','Aforo publicado del bloque','','number')}
-  </div></div>
-  <div class="card"><h2>👣 Seguimiento</h2>
-  <label>Seguir (fila sombreada) a 1 de cada N personas · 0 = elegir manualmente</label>
-  <input type="number" min="0" value="${c.seguirCada}" onchange="S.cfg.seguirCada=+this.value;save()">
-  <p class="muted">Recomendado: 2 (con 80 llegadas → ~40 seguidas, cubre el mínimo de 30 atenciones completas). Puede marcar/desmarcar cualquiera en la tabla.</p>
-  <button class="btn pri" onclick="tab='registro';render()">Listo → Ir a registrar</button></div>`;
-}
-function vSesionSel(){
-  return `<div class="row" style="margin-bottom:10px"><select style="flex:1" onchange="S.cur=+this.value;save();render()">
-  ${S.sessions.map(s=>`<option value="${s.id}" ${s.id===S.cur?'selected':''}>Sesión ${s.num} · ${s.fecha} · ${s.people.length} llegadas</option>`).join('')}</select>
-  <button class="btn" onclick="nuevaSesion()">＋ Nueva</button></div>`;
-}
-function vRegistro(){
-  const s=cur();
-  if(!s)return `<div class="card"><h2>Sin sesiones</h2><p class="muted">Cree la sesión 1 para empezar a registrar en <b>${esc(S.cfg.bloque)}</b>.</p><button class="btn pri" onclick="nuevaSesion()">＋ Crear sesión</button></div>`;
-  const k=calcSession(s);
-  const pend=s.people.filter(p=>p.seg&&!p.D&&p.obs!=='AB'&&p.obs!=='PE');
-  const c=+S.cfg.c||1;
-  let h=vSesionSel()+cutAlert(s)+`<div class="card">
-  <div class="grid"><div><label>Sesión N°</label><input type="number" value="${s.num}" onchange="cur().num=+this.value;save();hdr()"></div>
-  <div><label>Fecha</label><input type="date" value="${s.fecha}" onchange="cur().fecha=this.value;save()"></div>
-  <div><label>Día</label><input value="${esc(s.dia)}" onchange="cur().dia=this.value;save()"></div></div>
-  <div class="row" style="margin-top:10px">
-  ${!s.inicio?`<button class="btn pri" onclick="iniciar()">▶ Iniciar sesión</button>`:`<span class="pill">Inicio ${s.inicio}</span>`}
-  ${s.inicio&&!s.fin?`<span class="pill" id="elapsed"></span><button class="btn bad sm" onclick="finalizar()">■ Finalizar</button>`:''}
-  ${s.fin?`<span class="pill">Fin ${s.fin}</span><button class="btn sm" onclick="cur().fin='';save();render()">Reabrir</button>`:''}
-  <button class="btn warn sm" onclick="corte()">📸 Corte ahora</button></div></div>
-  <button class="big" onclick="llegada()">＋ LLEGADA<small>N° ${s.people.length+1} · toque cuando cruce la frontera de entrada</small></button>
-  <div class="stats"><div class="stat"><b>${k.total}</b><span>Llegadas /80</span></div><div class="stat"><b>${k.comp}</b><span>Completas /30</span></div>
-  <div class="stat"><b>${pend.length}</b><span>En seguimiento</span></div><div class="stat"><b>${k.cortes}</b><span>Cortes /6</span></div></div>`;
-  h+=`<div class="card"><h2>👣 Personas en seguimiento</h2>${pend.length?'':'<p class="muted">Nadie pendiente. Las filas sombreadas aparecerán aquí.</p>'}`;
-  pend.slice().reverse().forEach(p=>{
-    const nx=!p.B?['B','▶ Inicio atención','blue']:!p.C?['C','✔ Fin atención','pri']:['D','🚪 Salida','warn'];
-    h+=`<div class="follow"><div class="top"><b>#${p.n}</b><span class="times">A ${p.A} · B ${p.B||'—'} · C ${p.C||'—'}</span>
-    <select style="width:auto" onchange="setP(${p.n},'serv',this.value)"><option value="">Serv.</option>${Array.from({length:c},(_,i)=>`<option ${p.serv==i+1?'selected':''}>${i+1}</option>`).join('')}</select></div>
-    <div class="row"><button class="btn ${nx[2]} next" onclick="marcar(${p.n},'${nx[0]}')">${nx[1]}</button>
-    <button class="btn sm ${p.obs==='PR'?'warn':''}" onclick="setObs(${p.n},'PR')">PR</button>
-    <button class="btn sm" onclick="setObs(${p.n},'AB')" title="Se fue sin ser atendido">AB</button>
-    <button class="btn sm" onclick="setObs(${p.n},'PE')" title="Perdida">PE</button></div></div>`;
+/* ================== ACCIONES ULTRA RÁPIDAS ================== */
+function entradaRapida(tag=''){
+  const s = cur();
+  if(!s.inicio) s.inicio = nowT();
+  const n = s.people.length + 1;
+  s.people.push({
+    n,
+    nombre: tag,
+    A: nowT(),
+    B: '',
+    C: '',
+    D: '',
+    serv: '1',
+    obs: '',
+    seg: true
   });
-  h+=`</div><div class="card"><div class="row" style="justify-content:space-between"><h2>📋 Hoja 3 · Registro</h2><button class="btn bad sm" onclick="deshacer()">↶ Deshacer última</button></div>
-  <p class="muted">Sombreadas = seguidas. Puede editar cualquier hora (hh:mm:ss). Obs: AB se fue · PE perdida · PR prioridad.</p>
-  <div class="tbl"><table><thead><tr><th>N°</th><th>Seg</th><th>A. Llegada</th><th>B. Inicio</th><th>C. Fin</th><th>D. Salida</th><th>Serv</th><th>Obs</th></tr></thead><tbody>
-  ${s.people.slice().reverse().map(p=>`<tr class="${p.seg?'seg':''}"><td>${p.n}</td><td><input type="checkbox" style="min-width:0;width:20px" ${p.seg?'checked':''} onchange="setP(${p.n},'seg',this.checked)"></td>
-  ${['A','B','C','D'].map(f=>`<td><input value="${p[f]}" ${f!=='A'&&!p.seg?'disabled':''} onchange="setP(${p.n},'${f}',this.value.trim())"></td>`).join('')}
-  <td><input value="${esc(p.serv)}" style="min-width:40px" onchange="setP(${p.n},'serv',this.value)"></td>
-  <td><select onchange="setP(${p.n},'obs',this.value)">${['','AB','PE','PR'].map(o=>`<option ${p.obs===o?'selected':''}>${o}</option>`).join('')}</select></td></tr>`).join('')}
-  </tbody></table></div></div>`;
+  save();
+  vib(40);
+  beep(1100, .06);
+  toast(`Entrada #${n} registrada`);
+  render();
+}
+
+function marcarSalida(n){
+  const s = cur();
+  const p = s.people.find(x => x.n === n);
+  if(!p) return;
+  p.D = nowT();
+  if(p.B && !p.C) p.C = p.D;
+  save();
+  vib(50);
+  beep(750, .09);
+  const estancia = toS(p.D) - toS(p.A);
+  toast(`Salida #${n} · Duró ${dur(estancia)}`);
+  render();
+}
+
+function marcarPaso(n, paso){
+  const s = cur();
+  const p = s.people.find(x => x.n === n);
+  if(!p) return;
+  p[paso] = nowT();
+  if(paso === 'D' && p.B && !p.C) p.C = p.D;
+  save();
+  vib(35);
+  render();
+}
+
+function setPersonaTag(n, val){
+  const s = cur();
+  const p = s.people.find(x => x.n === n);
+  if(p){ p.nombre = val; save(); }
+}
+
+function setObsPersona(n, obs){
+  const s = cur();
+  const p = s.people.find(x => x.n === n);
+  if(!p) return;
+  p.obs = p.obs === obs ? '' : obs;
+  if(obs === 'AB' && !p.D) p.D = nowT();
+  save();
+  render();
+}
+
+function deshacerUltima(){
+  const s = cur();
+  if(!s.people.length) return;
+  if(!confirm(`¿Eliminar la última llegada (#${s.people.length})?`)) return;
+  s.people.pop();
+  save();
+  toast('Última llegada eliminada');
+  render();
+}
+
+function nuevaSesion(){
+  const n = S.sessions.length + 1;
+  const d = new Date();
+  const s = {
+    id: Date.now(),
+    num: n,
+    fecha: d.toISOString().slice(0,10),
+    dia: dias[d.getDay()],
+    inicio: '',
+    fin: '',
+    people: [],
+    cortes: [],
+    clima: 'Normal',
+    anormal: '',
+    franja: 'Hora pico'
+  };
+  S.sessions.push(s);
+  S.cur = s.id;
+  save();
+  toast(`Sesión ${n} iniciada`);
+  render();
+}
+
+function corteAuto(){
+  const s = cur();
+  const h = nowT();
+  const prev = s.cortes.length ? toS(s.cortes[s.cortes.length-1].hora) : toS(s.inicio);
+  const hs = toS(h);
+  const lleg = s.people.filter(p => {
+    const a = toS(p.A);
+    return a != null && (prev==null || a > prev) && a <= hs;
+  }).length;
+  const c = +S.cfg.c || 1;
+  const adentro = s.people.filter(p => p.A && !p.D).length;
+  s.cortes.push({
+    n: s.cortes.length + 1,
+    hora: h,
+    llegadas: lleg,
+    cola: Math.max(0, adentro - c),
+    ocup: Math.min(adentro, c),
+    libres: Math.max(0, c - adentro)
+  });
+  save();
+  beep(600, .25);
+  toast(`Corte ${s.cortes.length} registrado`);
+  render();
+}
+
+/* ================== MODAL DE CAMBIO RÁPIDO DE BLOQUE ================== */
+function abrirCambioBloque(){
+  const comunes = [
+    'Bloque Administrativo A',
+    'Bloque Administrativo B',
+    'Bloque A',
+    'Bloque B',
+    'Bloque C',
+    'Biblioteca',
+    'Cafetería Central',
+    'Admisiones'
+  ];
+  $('#modalSlot').innerHTML = `
+    <div class="modal" onclick="if(event.target===this)cerrarModal()">
+      <div class="modal-body">
+        <h2 style="margin-top:0">🏢 Cambiar Bloque</h2>
+        <label>Escribe o selecciona el bloque donde estás:</label>
+        <input id="inBloqueRapido" value="${esc(S.cfg.bloque)}" placeholder="Ej: Bloque Administrativo A" style="margin-bottom:10px;font-size:16px;font-weight:700">
+        <div class="row" style="margin-bottom:14px">
+          ${comunes.map(b => `<button class="btn sm" onclick="$('#inBloqueRapido').value='${b}'">${b}</button>`).join('')}
+        </div>
+        <div class="row" style="justify-content:flex-end">
+          <button class="btn" onclick="cerrarModal()">Cancelar</button>
+          <button class="btn pri" onclick="guardarBloqueRapido()">Guardar</button>
+        </div>
+      </div>
+    </div>`;
+  setTimeout(()=>$('#inBloqueRapido').focus(), 50);
+}
+function cerrarModal(){ $('#modalSlot').innerHTML = ''; }
+function guardarBloqueRapido(){
+  const val = $('#inBloqueRapido').value.trim();
+  if(val){
+    S.cfg.bloque = val;
+    save();
+    $('#hBloque').textContent = val;
+    toast(`Bloque: ${val}`);
+  }
+  cerrarModal();
+  render();
+}
+
+/* ================== VISTA: REGISTRO (DIRECTA Y LIMPIA) ================== */
+function vRegistro(){
+  const s = cur();
+  const k = calcSession(s);
+  const adentroList = s.people.filter(p => p.A && !p.D && p.obs !== 'AB' && p.obs !== 'PE');
+  const nowSeg = toS(nowT());
+
+  let h = '';
+
+  // Alerta de corte de 10 min si está pendiente
+  if(s.inicio && !s.fin){
+    const nextCut = toS(s.inicio) + 600 * (s.cortes.length + 1);
+    const left = nextCut - nowSeg;
+    if(left <= 0){
+      h += `<div class="alert">
+        <span>📸 ¡Toca hacer el Corte ${s.cortes.length+1}!</span>
+        <button class="btn sm pri" onclick="corteAuto()">Tomar Corte</button>
+      </div>`;
+    }
+  }
+
+  // Barra de resumen táctil
+  h += `
+  <div class="stats-bar">
+    <div class="stat-box"><b>${k.total}</b><span>Llegadas</span></div>
+    <div class="stat-box" style="border:1px solid var(--pri)"><b>${k.adentro}</b><span style="color:var(--pri)">Adentro</span></div>
+    <div class="stat-box"><b>${k.comp}</b><span>Salieron</span></div>
+    <div class="stat-box"><b>${dur(k.w)}</b><span>Estancia</span></div>
+  </div>`;
+
+  // BOTÓN GIGANTE DE ENTRADA
+  h += `
+  <div class="tap-zone">
+    <button class="btn-entry" onclick="entradaRapida()">
+      ＋ REGISTRAR ENTRADA
+      <span>Hora de llegada automática al tocar</span>
+    </button>
+  </div>`;
+
+  // Control de sesión discreto
+  h += `
+  <div class="row" style="justify-content:space-between;margin:6px 0 12px;font-size:12px;color:var(--mut)">
+    <span>Sesión ${s.num} (${s.fecha}) · ${s.inicio ? 'Inicio: '+s.inicio : 'Aún no inicia'}</span>
+    <div class="row">
+      <button class="btn sm" onclick="nuevaSesion()">＋ Nueva Sesión</button>
+      <button class="btn sm bad" onclick="deshacerUltima()">↶ Deshacer</button>
+    </div>
+  </div>`;
+
+  // LISTA DE PERSONAS ACTUALMENTE ADENTRO
+  h += `<div class="card">
+    <h2>
+      <span>🚶 Personas en el bloque (${adentroList.length})</span>
+      <small class="muted">Toca "Salida" cuando salgan</small>
+    </h2>`;
+
+  if(adentroList.length === 0){
+    h += `<p class="muted" style="text-align:center;padding:16px 0">No hay nadie dentro ahora mismo.<br>Toca <b>＋ REGISTRAR ENTRADA</b> cuando alguien llegue.</p>`;
+  } else {
+    adentroList.slice().reverse().forEach(p => {
+      const transcurrido = nowSeg ? nowSeg - toS(p.A) : 0;
+      const badgeCls = p.C ? 'ok' : (p.B ? 'blue' : 'warn');
+
+      h += `
+      <div class="p-card ${p.B ? 'atencion' : 'cola'}">
+        <div class="p-top">
+          <div class="row">
+            <span class="p-id">#${p.n}</span>
+            <input class="p-tag-input" value="${esc(p.nombre||'')}" placeholder="Nota/Nombre (opcional)" onchange="setPersonaTag(${p.n}, this.value)">
+          </div>
+          <div class="p-time">
+            Llegó: <b>${p.A}</b> · <span class="badge ${badgeCls}">${dur(transcurrido)}</span>
+          </div>
+        </div>
+
+        <div class="p-actions">
+          <!-- BOTÓN DIRECTO DE SALIDA -->
+          <button class="btn warn sm" style="font-weight:700;padding:8px 14px" onclick="marcarSalida(${p.n})">
+            🚪 MARCAR SALIDA
+          </button>
+
+          <!-- BOTONES SECUNDARIOS DE ATENCIÓN EN VENTANILLA -->
+          ${!p.B ? `
+            <button class="btn sm blue" onclick="marcarPaso(${p.n},'B')">▶ Inició atención</button>
+          ` : (!p.C ? `
+            <button class="btn sm pri" onclick="marcarPaso(${p.n},'C')">✔ Fin atención</button>
+          ` : `
+            <span class="badge ok">Atendido</span>
+          `)}
+
+          <!-- INCIDENCIAS RÁPIDAS -->
+          <button class="btn sm ${p.obs==='AB'?'bad':''}" title="Abandonó la fila" onclick="setObsPersona(${p.n},'AB')">AB</button>
+          <button class="btn sm ${p.obs==='PE'?'bad':''}" title="Dato perdido" onclick="setObsPersona(${p.n},'PE')">PE</button>
+        </div>
+      </div>`;
+    });
+  }
+  h += `</div>`;
+
+  // HISTORIAL DE HOY (TABLA)
+  h += `
+  <div class="card">
+    <h2>
+      <span>📋 Historial de personas (${s.people.length})</span>
+    </h2>
+    <div class="tbl">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Llegada</th>
+            <th>Salida</th>
+            <th>Estancia</th>
+            <th>Atención</th>
+            <th>Obs</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${s.people.slice().reverse().map(p => {
+            const estancia = toS(p.A)!=null && toS(p.D)!=null ? dur(toS(p.D)-toS(p.A)) : '—';
+            const atencion = toS(p.B)!=null && toS(p.C)!=null ? dur(toS(p.C)-toS(p.B)) : '—';
+            return `
+            <tr>
+              <td><b>#${p.n}</b> ${esc(p.nombre||'')}</td>
+              <td>${p.A||'—'}</td>
+              <td>${p.D||'<span class="badge warn">Adentro</span>'}</td>
+              <td>${estancia}</td>
+              <td>${atencion}</td>
+              <td><span class="badge ${p.obs?'bad':''}">${p.obs||'—'}</span></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+
   return h;
 }
-function cutAlert(s){
-  if(!s||!s.inicio||s.fin)return '';
-  const next=toS(s.inicio)+600*(s.cortes.length+1);
-  const left=next-toS(nowT());
-  if(left<=0)return `<div class="alert">📸 ¡Toca el corte ${s.cortes.length+1}! <button class="btn" onclick="corte()">Hacer corte</button></div>`;
-  return `<div class="muted" style="margin-bottom:8px">Próximo corte (${s.cortes.length+1}) a las ${fromS(next)} · faltan <span id="cutLeft">${dur(left)}</span></div>`;
-}
+
+/* ================== VISTA: CORTES CADA 10 MIN ================== */
 function vCortes(){
-  const s=cur();if(!s)return vRegistro();
-  return vSesionSel()+cutAlert(s)+`<div class="card"><div class="row" style="justify-content:space-between"><h2>📸 Formato 3 · Conteo cada 10 min</h2><button class="btn warn" onclick="corte()">Corte ahora</button></div>
-  <p class="muted">Al tocar "Corte" se guarda la hora exacta y las llegadas de los últimos 10 min se calculan solas. Ajuste cola y servidores ocupados. Un 0 medido es dato.</p>
-  ${s.cortes.slice().reverse().map(k=>{const i=k.n-1;return `<div class="follow" style="border-left-color:var(--blue)"><div class="top"><b>Corte ${k.n}</b>
-  <input style="width:110px" value="${k.hora}" onchange="setCorte(${i},'hora',this.value)"><button class="btn sm" onclick="delCorte(${i})">🗑</button></div>
-  <div class="grid">
-  <div><label>Llegadas en los 10 min</label><div class="step"><button class="btn" onclick="stepCorte(${i},'llegadas',-1)">−</button><b>${k.llegadas}</b><button class="btn" onclick="stepCorte(${i},'llegadas',1)">＋</button></div></div>
-  <div><label>Personas en cola</label><div class="step"><button class="btn" onclick="stepCorte(${i},'cola',-1)">−</button><b>${k.cola}</b><button class="btn" onclick="stepCorte(${i},'cola',1)">＋</button></div></div>
-  <div><label>Servidores ocupados (libres: ${k.libres})</label><div class="step"><button class="btn" onclick="stepCorte(${i},'ocup',-1)">−</button><b>${k.ocup}</b><button class="btn" onclick="stepCorte(${i},'ocup',1)">＋</button></div></div>
-  </div></div>`}).join('')||'<p class="muted">Aún no hay cortes.</p>'}</div>`;
+  const s = cur();
+  return `
+  <div class="card">
+    <div class="row" style="justify-content:space-between">
+      <h2>📸 Formato 3 · Cortes de 10 min</h2>
+      <button class="btn warn" onclick="corteAuto()">＋ Tomar Corte Ahora</button>
+    </div>
+    <p class="muted">La norma de la universidad exige 6 cortes de 10 min por sesión. Las llegadas se cuentan automáticamente entre corte y corte.</p>
+    
+    ${s.cortes.slice().reverse().map((k, idx) => {
+      const i = k.n - 1;
+      return `
+      <div class="card" style="background:var(--card2);border-left:4px solid var(--blue)">
+        <div class="row" style="justify-content:space-between;margin-bottom:8px">
+          <b>Corte #${k.n} · Hora: ${k.hora}</b>
+          <button class="btn sm bad" onclick="if(confirm('¿Borrar corte?')){cur().cortes.splice(${i},1);save();render()}">🗑</button>
+        </div>
+        <div class="grid">
+          <div>
+            <label>Llegadas en los 10 min</label>
+            <div class="step">
+              <button class="btn" onclick="cur().cortes[${i}].llegadas=Math.max(0,cur().cortes[${i}].llegadas-1);save();render()">−</button>
+              <b>${k.llegadas}</b>
+              <button class="btn" onclick="cur().cortes[${i}].llegadas++;save();render()">＋</button>
+            </div>
+          </div>
+          <div>
+            <label>Personas en cola</label>
+            <div class="step">
+              <button class="btn" onclick="cur().cortes[${i}].cola=Math.max(0,cur().cortes[${i}].cola-1);save();render()">−</button>
+              <b>${k.cola}</b>
+              <button class="btn" onclick="cur().cortes[${i}].cola++;save();render()">＋</button>
+            </div>
+          </div>
+          <div>
+            <label>Servidores ocupados</label>
+            <div class="step">
+              <button class="btn" onclick="cur().cortes[${i}].ocup=Math.max(0,cur().cortes[${i}].ocup-1);save();render()">−</button>
+              <b>${k.ocup}</b>
+              <button class="btn" onclick="cur().cortes[${i}].ocup++;save();render()">＋</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }).join('') || '<p class="muted" style="text-align:center;padding:20px">No has hecho cortes en esta sesión todavía.</p>'}
+  </div>`;
 }
-function statRows(k){
-  return [['Llegadas registradas',k.total],['Llegadas válidas (sin PE)',k.validas],['Atenciones completas',k.comp],['Perdidas (PE)',k.pe],['Abandonos (AB)',k.ab],['Con prioridad (PR)',k.pr],
-  ['Duración (min)',r2(k.durMin)],['Tasa de llegada λ (pers/min)',r2(k.lambda)],['Tasa de llegada (pers/hora)',r2(k.lambda*60)],
-  ['Tiempo entre llegadas prom.',dur(k.inter)+(k.interSd!=null?' (σ '+dur(k.interSd)+')':'')],['Espera en cola prom. (B−A)',dur(k.wq)],['Tiempo de atención prom. (C−B)',dur(k.ws)],
-  ['Salida tras atención (D−C)',dur(k.wx)],['Tiempo en el sistema / recorrido (D−A)',dur(k.w)],['Cola promedio (cortes)',r2(k.colaProm)],['Cola máxima (cortes)',k.colaMax??''],['Utilización servidores ρ',k.util!=null?Math.round(k.util*100)+'%':'']];
-}
+
+/* ================== VISTA: MÉTRICAS Y DATOS PARA UNITY ================== */
 function vResumen(){
-  const s=cur();if(!s)return vRegistro();
-  const k=calcSession(s);
-  return vSesionSel()+`<div class="card"><h2>📊 Formato 4 · Resumen sesión ${s.num}</h2><table>${statRows(k).map(r=>`<tr><td style="text-align:left">${r[0]}</td><td><b>${r[1]}</b></td></tr>`).join('')}</table>
-  <label>Clima y condiciones del día</label><input value="${esc(s.clima)}" onchange="cur().clima=this.value;save()">
-  <label>Algo anormal que explique datos raros</label><textarea onchange="cur().anormal=this.value;save()">${esc(s.anormal)}</textarea>
-  <label>Franja pico</label><input value="${esc(s.franja)}" placeholder="9:00–10:00" onchange="cur().franja=this.value;save()"></div>
-  <div class="card"><h2>✅ Revisión antes de guardar</h2>${checks(s).map(c=>`<div class="check"><span class="pill ${c[1]?'ok':'no'}">${c[1]?'✔':'✘'}</span> ${c[0]}</div>`).join('')}</div>`+vConsolidado();
-}
-function allPeople(){return S.sessions.flatMap(s=>s.people.map(p=>({...p,s})))}
-function consolidado(){
-  const ks=S.sessions.map(calcSession);
-  const m=f=>r2(avg(ks.map(f).filter(x=>x!=null&&!isNaN(x))));
-  const mm=f=>{const v=avg(ks.map(f).filter(x=>x!=null&&!isNaN(x)));return v==null?'':r2(v/60)+' min'};
-  return [
-    ['Personas promedio por sesión (llegadas)',m(k=>k.total)],
-    ['Personas promedio por hora',m(k=>k.lambda*60)],
-    ['Tiempo promedio de recorrido / sistema (D−A)',mm(k=>k.w)],
-    ['Tiempo promedio de espera (B−A)',mm(k=>k.wq)],
-    ['Tiempo promedio de atención (C−B)',mm(k=>k.ws)],
-    ['Capacidad del espacio (espera / aforo)',(S.cfg.capEspera||'—')+' / '+(S.cfg.aforo||'—')],
-    ['Frecuencia de llegada λ (pers/min)',m(k=>k.lambda)],
-    ['Tiempo entre llegadas promedio (s)',m(k=>k.inter)],
-    ['Cola promedio',m(k=>k.colaProm)],
-    ['Número de servidores (c)',S.cfg.c],
-    ['Utilización promedio ρ',m(k=>k.util)],
-    ['Abandonos promedio por sesión',m(k=>k.ab)],
+  const s = cur();
+  const k = calcSession(s);
+  const ks = S.sessions.map(calcSession);
+  const m = f => r2(avg(ks.map(f).filter(x=>x!=null&&!isNaN(x))));
+  const mm = f => {
+    const v = avg(ks.map(f).filter(x=>x!=null&&!isNaN(x)));
+    return v==null ? '—' : r2(v/60)+' min ('+Math.round(v)+' s)';
+  };
+
+  const consolidados = [
+    ['Personas promedio por sesión (llegadas)', m(x=>x.total)],
+    ['Tiempo promedio de recorrido en bloque (D−A)', mm(x=>x.w)],
+    ['Tiempo promedio de espera en cola (B−A)', mm(x=>x.wq)],
+    ['Tiempo promedio de atención en ventanilla (C−B)', mm(x=>x.ws)],
+    ['Capacidad del espacio (espera / aforo)', (S.cfg.capEspera||'—')+' / '+(S.cfg.aforo||'—')],
+    ['Frecuencia de llegada λ (personas/minuto)', m(x=>x.lambda)],
+    ['Frecuencia de llegada (personas/hora)', r2(m(x=>x.lambda)*60)],
+    ['Tiempo promedio entre llegadas (s)', m(x=>x.inter)+' s'],
+    ['Cola promedio observada', m(x=>x.colaProm)],
+    ['Utilización promedio de servidores ρ', m(x=>x.util) ? Math.round(m(x=>x.util)*100)+'%' : '—']
   ];
+
+  return `
+  <div class="card">
+    <h2>🧩 Datos para la Simulación en Unity</h2>
+    <p class="muted">Aquí tienes directamente la tabla solicitada para calibrar tu modelo en Unity:</p>
+    <table>
+      <thead>
+        <tr>
+          <th style="text-align:left">Variable</th>
+          <th>Dato Observado Real</th>
+          <th>Valor usado en Unity</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${consolidados.map(r => `
+          <tr>
+            <td style="text-align:left"><b>${r[0]}</b></td>
+            <td><span class="badge ok">${r[1]}</span></td>
+            <td><input value="${esc(S.cfg.unity[r[0]]||'')}" placeholder="Ej: ${r[1]}" onchange="S.cfg.unity['${r[0]}']=this.value;save()"></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>📊 Resumen de la Sesión Actual (#${s.num})</h2>
+    <table>
+      <tr><td style="text-align:left">Total de llegadas registradas</td><td><b>${k.total}</b></td></tr>
+      <tr><td style="text-align:left">Total salidas completas</td><td><b>${k.comp}</b></td></tr>
+      <tr><td style="text-align:left">Personas aún en el bloque</td><td><b>${k.adentro}</b></td></tr>
+      <tr><td style="text-align:left">Tiempo prom. de recorrido (D−A)</td><td><b>${dur(k.w)}</b></td></tr>
+      <tr><td style="text-align:left">Tiempo prom. entre llegadas</td><td><b>${dur(k.inter)}</b></td></tr>
+      <tr><td style="text-align:left">Cortes de 10 min realizados</td><td><b>${k.cortes} / 6</b></td></tr>
+      <tr><td style="text-align:left">Abandonos (AB)</td><td><b>${k.ab}</b></td></tr>
+    </table>
+  </div>`;
 }
-function vConsolidado(){
-  return `<div class="card"><h2>🧩 Consolidación de datos (todas las sesiones: ${S.sessions.length})</h2>
-  <table><thead><tr><th style="text-align:left">Variable</th><th>Dato observado</th><th>Valor en Unity</th></tr></thead><tbody>
-  ${consolidado().map(r=>`<tr><td style="text-align:left">${r[0]}</td><td><b>${r[1]}</b></td><td><input value="${esc(S.cfg.unity[r[0]]||'')}" onchange="S.cfg.unity['${r[0]}']=this.value;save()"></td></tr>`).join('')}
-  </tbody></table></div>`;
-}
+
+/* ================== VISTA: EXPORTAR ================== */
 function vDatos(){
-  return `<div class="card"><h2>💾 Exportar</h2>
-  <p class="muted">Archivo: Zona#_Bloque#_Pareja.xlsx · una sola hoja de cálculo por pareja, con sesión y fecha al inicio.</p>
-  <div class="row"><button class="btn pri" onclick="exportXLSX()">⬇ Excel (.xlsx)</button><button class="btn" onclick="exportCSV()">⬇ CSV llegadas</button><button class="btn" onclick="exportJSON()">⬇ Respaldo JSON</button>
-  <label class="btn" style="margin:0;color:var(--txt)">⬆ Importar JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(this.files[0])"></label></div></div>
-  <div class="card"><h2>Sesiones</h2>${S.sessions.map(s=>`<div class="row" style="justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span>Sesión ${s.num} · ${s.fecha} · ${s.people.length} llegadas · ${s.cortes.length} cortes</span>
-  <button class="btn bad sm" onclick="if(confirm('¿Borrar sesión ${s.num}?')){S.sessions=S.sessions.filter(x=>x.id!==${s.id});if(S.cur===${s.id})S.cur=S.sessions[0]?.id||null;save();render()}">Borrar</button></div>`).join('')||'<p class="muted">Sin sesiones.</p>'}
-  <button class="btn bad" style="margin-top:12px" onclick="if(confirm('¿Borrar TODO?')&&confirm('Seguro, se perderán los datos')){localStorage.removeItem(KEY);location.reload()}">Borrar todo</button></div>
-  <p class="muted">Los datos se guardan automáticamente en este navegador (funciona sin internet una vez cargada). Exporte un respaldo al terminar cada sesión.</p>`;
+  return `
+  <div class="card">
+    <h2>💾 Descargar Archivos para la Entrega</h2>
+    <p class="muted">Genera el archivo oficial <b>${fname('xlsx')}</b> con las 5 hojas requeridas por la universidad.</p>
+    <div class="row" style="margin-bottom:12px">
+      <button class="btn pri" onclick="exportXLSX()">⬇ Descargar Excel (.xlsx)</button>
+      <button class="btn" onclick="exportCSV()">⬇ CSV</button>
+      <button class="btn" onclick="exportJSON()">⬇ Respaldo JSON</button>
+      <label class="btn" style="margin:0;cursor:pointer">⬆ Restaurar JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(this.files[0])"></label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Sesiones Guardadas (${S.sessions.length})</h2>
+    ${S.sessions.map(s => `
+      <div class="row" style="justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)">
+        <span><b>Sesión ${s.num}</b> · ${s.fecha} · ${s.people.length} personas</span>
+        <button class="btn sm bad" onclick="if(confirm('¿Borrar Sesión ${s.num}?')){S.sessions=S.sessions.filter(x=>x.id!==${s.id});if(S.cur===${s.id})S.cur=S.sessions[0]?.id;save();render()}">Borrar</button>
+      </div>
+    `).join('')}
+  </div>`;
 }
 
-/* ================== EXPORTAR ================== */
-function fname(ext){const c=S.cfg;const cl=x=>String(x||'').replace(/[^\w]+/g,'');return `${cl(c.zona)||'Zona'}_${cl(c.bloque)||'Bloque'}_${cl(c.est1)}${c.est2?'-'+cl(c.est2):''}.${ext}`}
+/* ================== VISTA: BLOQUE / PARÁMETROS UNIVERSIDAD (OPCIONAL) ================== */
+function vBloque(){
+  const c = S.cfg;
+  const f = (k,l,ph='',type='text') => `<div><label>${l}</label><input type="${type}" value="${esc(c[k])}" placeholder="${ph}" onchange="S.cfg['${k}']=this.value;save();hdr()"></div>`;
+  const sel = (k,l,ops) => `<div><label>${l}</label><select onchange="S.cfg['${k}']=this.value;save()">${ops.map(o=>`<option ${c[k]===o?'selected':''}>${o}</option>`).join('')}</select></div>`;
+
+  return `
+  <div class="card">
+    <h2>🏢 Datos del Bloque (Pre-llenados)</h2>
+    <p class="muted">Estos datos ya tienen valores por defecto para que no pierdas tiempo. Modifícalos solo si deseas ajustarlos para el Excel.</p>
+    <div class="grid">
+      ${f('bloque','Bloque en observación','Bloque Administrativo A')}
+      ${f('zona','Zona','Zona 1')}
+      ${f('est1','Estudiante (Tú)','Balmes')}
+      ${f('est2','Compañero (opcional)','')}
+      ${f('punto','Punto exacto observado','Entrada principal / Bloque Adm A')}
+      ${f('horario','Horario','Hora pico')}
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>⚙️ Formato 1 · Parámetros Estructurales</h2>
+    <div class="grid">
+      ${f('c','Número de servidores / ventanillas (c)','1','number')}
+      ${sel('iguales','¿Servidores iguales?',['Sí','No'])}
+      ${f('accesos','Accesos del bloque','1 acceso')}
+      ${sel('disciplina','Disciplina de cola',['FIFO','Prioridad','Sin orden'])}
+      ${sel('fila','Tipo de fila',['Una sola fila','Una por servidor'])}
+      ${f('capEspera','Capacidad de espera (personas)','20','number')}
+      ${f('aforo','Aforo total del bloque','50','number')}
+    </div>
+    <div style="margin-top:12px">
+      <button class="btn pri" onclick="tab='registro';render()">← Volver al Registro</button>
+    </div>
+  </div>`;
+}
+
+/* ================== EXPORTACIÓN EXCEL ================== */
+function fname(ext){
+  const c = S.cfg;
+  const cl = x => String(x||'').replace(/[^\w]+/g,'');
+  return `${cl(c.zona)||'Zona1'}_${cl(c.bloque)||'BloqueAdmin'}_${cl(c.est1)||'Balmes'}.${ext}`;
+}
+function allPeople(){ return S.sessions.flatMap(s => s.people.map(p => ({...p, s}))); }
+
 function rowsLlegadas(){
-  return allPeople().map(p=>{const d=(a,b)=>toS(p[a])!=null&&toS(p[b])!=null?toS(p[b])-toS(p[a]):'';
-    return {'Sesión':p.s.num,'Fecha':p.s.fecha,'Día':p.s.dia,'Zona':S.cfg.zona,'Bloque':S.cfg.bloque,'N°':p.n,'Seguida':p.seg?'Sí':'No','A. Llegada':p.A,'B. Inicio atención':p.B,'C. Fin atención':p.C,'D. Salida':p.D,'Serv.':p.serv,'Obs.':p.obs,
-    'Espera B-A (s)':d('A','B'),'Atención C-B (s)':d('B','C'),'Salida D-C (s)':d('C','D'),'Sistema D-A (s)':d('A','D')}});
+  return allPeople().map(p => {
+    const d = (a,b) => toS(p[a])!=null && toS(p[b])!=null ? toS(p[b])-toS(p[a]) : '';
+    return {
+      'Sesión': p.s.num,
+      'Fecha': p.s.fecha,
+      'Día': p.s.dia,
+      'Bloque': S.cfg.bloque,
+      'N°': p.n,
+      'Etiqueta / Nota': p.nombre || '',
+      'A. Llegada': p.A,
+      'B. Inicio atención': p.B,
+      'C. Fin atención': p.C,
+      'D. Salida': p.D,
+      'Espera en cola B-A (s)': d('A','B'),
+      'Atención C-B (s)': d('B','C'),
+      'Tiempo recorrido en bloque D-A (s)': d('A','D'),
+      'Obs': p.obs
+    };
+  });
 }
-function rowsCortes(){return S.sessions.flatMap(s=>s.cortes.map(k=>({'Sesión':s.num,'Fecha':s.fecha,'Corte':k.n,'Hora exacta':k.hora,'Llegadas en los 10 min':+k.llegadas,'Personas en cola':+k.cola,'Servidores ocupados':+k.ocup,'Servidores libres':+k.libres})))}
-function exportXLSX(){
-  if(!window.XLSX){toast('Sin librería Excel (sin internet). Use CSV.');return}
-  const wb=XLSX.utils.book_new(),c=S.cfg;
-  const f1=[['Zona',c.zona],['Bloque',c.bloque],['Estudiante 1',c.est1],['Estudiante 2',c.est2],['Punto exacto observado',c.punto],['Horario del punto',c.horario],[],
-    ['FORMATO 1 · Parámetro','Valor'],['Número de servidores (c)',c.c],['¿Servidores iguales?',c.iguales],['Accesos del bloque',c.accesos],['Disciplina de la cola',c.disciplina],['¿Una sola fila o una por servidor?',c.fila],
-    ['Capacidad de la zona de espera',c.capEspera],['Turnos del personal',c.turnos],['¿Se va gente al ver la fila?',c.abandono],['Abandonos por hora',c.abandonoHora],['Aforo publicado del bloque',c.aforo]];
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(f1),'Bloque (F1)');
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rowsLlegadas()),'Registro (Hoja 3)');
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rowsCortes()),'Cortes (F3)');
-  const res=[['Indicador',...S.sessions.map(s=>'Sesión '+s.num)]];
-  const sr=S.sessions.map(s=>statRows(calcSession(s)));
-  if(sr.length)sr[0].forEach((r,i)=>res.push([r[0],...sr.map(x=>x[i][1])]));
-  res.push(['Fecha',...S.sessions.map(s=>s.fecha)],['Hora inicio',...S.sessions.map(s=>s.inicio)],['Hora fin',...S.sessions.map(s=>s.fin)],['Franja pico',...S.sessions.map(s=>s.franja)],['Clima',...S.sessions.map(s=>s.clima)],['Anormal',...S.sessions.map(s=>s.anormal)]);
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(res),'Resumen (F4)');
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Variable','Datos observados','Valor utilizado en Unity'],...consolidado().map(r=>[r[0],r[1],c.unity[r[0]]||''])]),'Consolidación');
-  XLSX.writeFile(wb,fname('xlsx'));
-}
-function dl(name,data,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type}));a.download=name;a.click()}
-function exportCSV(){const r=rowsLlegadas();if(!r.length)return toast('Sin datos');const h=Object.keys(r[0]);dl(fname('csv'),'\ufeff'+[h.join(';'),...r.map(x=>h.map(k=>`"${String(x[k]).replace(/"/g,'""')}"`).join(';'))].join('\n'),'text/csv')}
-function exportJSON(){dl(fname('json'),JSON.stringify(S,null,1),'application/json')}
-function importJSON(f){if(!f)return;f.text().then(t=>{try{const d=JSON.parse(t);if(!d.cfg||!d.sessions)throw 0;if(confirm('¿Reemplazar los datos actuales?')){S=d;S.cfg={...defCfg,...S.cfg};save();render();toast('Importado')}}catch(e){alert('Archivo inválido')}})}
 
-/* ================== RENDER ================== */
-function hdr(){const s=cur();$('#hTitle').textContent=S.cfg.bloque||'Registro de Bloques';$('#hSub').textContent=(S.cfg.zona?S.cfg.zona+' · ':'')+(s?'Sesión '+s.num+' · '+s.fecha:'Sin sesión')}
-function render(){
-  const y=scrollY;
-  $('#app').innerHTML={bloque:vBloque,registro:vRegistro,cortes:vCortes,resumen:vResumen,datos:vDatos}[tab]();
-  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
-  hdr();scrollTo(0,y);
+function exportXLSX(){
+  if(!window.XLSX){ toast('Sin librería Excel. Use CSV.'); return; }
+  const wb = XLSX.utils.book_new(), c = S.cfg;
+
+  // Hoja 1: Parámetros del Bloque
+  const f1 = [
+    ['UNIVERSIDAD DE LA GUAJIRA - SIMULACIÓN'],
+    ['FORMATO DE TOMA DE DATOS EN BLOQUES'],
+    [],
+    ['Zona', c.zona],
+    ['Bloque', c.bloque],
+    ['Estudiante 1', c.est1],
+    ['Estudiante 2', c.est2],
+    ['Punto observado', c.punto],
+    ['Horario', c.horario],
+    [],
+    ['PARÁMETROS ESTRUCTURALES (FORMATO 1)', 'VALOR'],
+    ['Número de servidores (c)', c.c],
+    ['¿Servidores iguales?', c.iguales],
+    ['Accesos del bloque', c.accesos],
+    ['Disciplina de la cola', c.disciplina],
+    ['Tipo de fila', c.fila],
+    ['Capacidad de la zona de espera', c.capEspera],
+    ['Aforo publicado', c.aforo]
+  ];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(f1), 'Bloque (F1)');
+
+  // Hoja 2: Registro
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rowsLlegadas()), 'Registro (Hoja 3)');
+
+  // Hoja 3: Cortes cada 10 min
+  const rCortes = S.sessions.flatMap(s => s.cortes.map(k => ({
+    'Sesión': s.num,
+    'Fecha': s.fecha,
+    'Corte N°': k.n,
+    'Hora': k.hora,
+    'Llegadas en 10 min': k.llegadas,
+    'Personas en cola': k.cola,
+    'Servidores ocupados': k.ocup
+  })));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rCortes), 'Cortes (F3)');
+
+  // Hoja 4: Métricas Unity
+  const ks = S.sessions.map(calcSession);
+  const m = f => r2(avg(ks.map(f).filter(x=>x!=null&&!isNaN(x))));
+  const tUnity = [
+    ['Variable para Unity', 'Datos Observados', 'Valor utilizado en Unity'],
+    ['Personas promedio', m(x=>x.total), c.unity['Personas promedio por sesión (llegadas)']||m(x=>x.total)],
+    ['Tiempo promedio de recorrido', r2(m(x=>x.w)/60)+' min', c.unity['Tiempo promedio de recorrido en bloque (D−A)']||r2(m(x=>x.w)/60)+' min'],
+    ['Tiempo promedio de espera', r2(m(x=>x.wq)/60)+' min', c.unity['Tiempo promedio de espera en cola (B−A)']||'0 min'],
+    ['Capacidad del espacio', c.capEspera + ' / ' + c.aforo, c.capEspera],
+    ['Frecuencia de llegada', m(x=>x.lambda)+' pers/min', c.unity['Frecuencia de llegada λ (personas/minuto)']||m(x=>x.lambda)]
+  ];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(tUnity), 'Consolidación Unity');
+
+  XLSX.writeFile(wb, fname('xlsx'));
 }
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render();scrollTo(0,0)});
-let alerted=-1;
-setInterval(()=>{
-  $('#clock').textContent=nowT();
-  const s=cur();if(!s||!s.inicio||s.fin)return;
-  const el=$('#elapsed');if(el)el.textContent='⏱ '+dur(toS(nowT())-toS(s.inicio));
-  const left=toS(s.inicio)+600*(s.cortes.length+1)-toS(nowT());
-  const cl=$('#cutLeft');if(cl)cl.textContent=dur(left);
-  if(left<=0&&alerted!==s.cortes.length){alerted=s.cortes.length;beep(700,.4);vib([200,100,200]);if(tab==='registro'||tab==='cortes'){const a=document.activeElement;if(!a||a.tagName!=='INPUT')render()}}
-},1000);
+
+function dl(name, data, type){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([data], {type}));
+  a.download = name;
+  a.click();
+}
+function exportCSV(){
+  const r = rowsLlegadas();
+  if(!r.length) return toast('Sin datos');
+  const h = Object.keys(r[0]);
+  dl(fname('csv'), '\ufeff' + [h.join(';'), ...r.map(x=>h.map(k=>`"${String(x[k]).replace(/"/g,'""')}"`).join(';'))].join('\n'), 'text/csv');
+}
+function exportJSON(){ dl(fname('json'), JSON.stringify(S, null, 1), 'application/json'); }
+function importJSON(f){
+  if(!f) return;
+  f.text().then(t => {
+    try {
+      const d = JSON.parse(t);
+      if(!d.cfg || !d.sessions) throw 0;
+      if(confirm('¿Reemplazar datos actuales con el respaldo?')){
+        S = d;
+        save();
+        render();
+        toast('Datos cargados');
+      }
+    }catch(e){ alert('Archivo inválido'); }
+  });
+}
+
+/* ================== RENDER & RELOJ ================== */
+function hdr(){
+  $('#hBloque').textContent = S.cfg.bloque || 'Bloque Administrativo A';
+}
+function render(){
+  const y = scrollY;
+  $('#app').innerHTML = {
+    registro: vRegistro,
+    cortes: vCortes,
+    resumen: vResumen,
+    datos: vDatos,
+    bloque: vBloque
+  }[tab]();
+
+  document.querySelectorAll('nav button').forEach(b => {
+    b.classList.toggle('on', b.dataset.t === tab);
+  });
+  hdr();
+  scrollTo(0, y);
+}
+
+document.querySelectorAll('nav button').forEach(b => {
+  b.onclick = () => {
+    tab = b.dataset.t;
+    render();
+    scrollTo(0, 0);
+  };
+});
+
+setInterval(() => {
+  $('#clock').textContent = nowT();
+  const s = cur();
+  if(!s || !s.inicio || s.fin) return;
+  if(tab === 'registro'){
+    const nowSeg = toS(nowT());
+    const nextCut = toS(s.inicio) + 600 * (s.cortes.length + 1);
+    const left = nextCut - nowSeg;
+    if(left === 0){
+      beep(700, .4);
+      vib([200,100,200]);
+      render();
+    }
+  }
+}, 1000);
+
 render();
 </script>
 </body>
