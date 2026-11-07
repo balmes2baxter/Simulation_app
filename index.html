@@ -190,8 +190,8 @@ if(!S.sessions || S.sessions.length === 0){
 }
 
 let tab = 'registro';
-let puertaActual = 'Delantera';    // 'Delantera' o 'Trasera'
-let tipoActual = 'Estudiante';      // 'Estudiante' o 'Funcionario'
+let puertaActual = 'Delantera';
+let tipoActual = 'Estudiante';
 
 const save = () => localStorage.setItem(KEY, JSON.stringify(S));
 const cur = () => S.sessions.find(s => s.id === S.cur) || S.sessions[S.sessions.length - 1];
@@ -606,7 +606,7 @@ function vRegistro(){
   // Barra de selección y descarga rápida de la sesión activa
   h += `
   <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:10px;gap:6px">
-    <div style="flex:1;min-width:170px">
+    <div style="flex:1;min-width:160px">
       <select onchange="cambiarSesion(+this.value)" style="padding:7px 10px;font-size:13px;font-weight:700">
         ${S.sessions.map(x => `
           <option value="${x.id}" ${x.id===s.id ? 'selected':''}>
@@ -616,11 +616,14 @@ function vRegistro(){
       </select>
     </div>
     <div class="row" style="gap:4px">
-      <button class="btn sm pri" style="font-weight:700;padding:7px 10px" onclick="exportXLSX(${s.id})" title="Descargar Excel de esta sesión">
+      <button class="btn sm pri" style="font-weight:700;padding:7px 9px" onclick="exportXLSX(${s.id})" title="Descargar Excel de esta sesión">
         📥 Excel
       </button>
+      <button class="btn sm blue" style="font-weight:700;padding:7px 9px" onclick="compartirArchivo('xlsx', ${s.id})" title="Enviar por WhatsApp o Drive">
+        📲 Enviar
+      </button>
       <button class="btn sm" style="padding:7px 8px" onclick="exportJSON(${s.id})" title="Descargar respaldo JSON de esta sesión">
-        💾 JSON
+        💾
       </button>
       <button class="btn sm" style="padding:7px 8px" onclick="crearSiguienteSesionManual()" title="Crear nueva sesión limpia">
         ＋
@@ -663,7 +666,6 @@ function vRegistro(){
       </button>
     </div>`;
 
-    // Alerta de corte de 10 min si está pendiente
     const nextCut = toS(s.inicio) + 600 * (s.cortes.length + 1);
     const left = nextCut - nowSeg;
     if(left <= 0){
@@ -686,7 +688,7 @@ function vRegistro(){
       </div>
       <div class="row">
         <button class="btn sm" onclick="reabrirSesion(${s.id})">Reabrir</button>
-        <button class="btn pri sm" onclick="crearSiguienteSesionManual()">＋ Nueva Sesión</button>
+        <button class="btn pri sm" onclick="crearSiguienteSesionManual()">＋ Siguiente Sesión</button>
       </div>
     </div>`;
   }
@@ -707,7 +709,6 @@ function vRegistro(){
 
     h += `
     <div class="card" style="padding:10px;margin-bottom:12px;background:var(--card2)">
-      <!-- 1. TIPO DE PERSONA -->
       <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.3px">
         <span>1. ¿Quién entra?</span>
         <span style="color:${esEst?'#4ade80':'#c084fc'}">${tipoActual}</span>
@@ -721,7 +722,6 @@ function vRegistro(){
         </button>
       </div>
 
-      <!-- 2. PUERTA DE ENTRADA -->
       <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-top:6px">
         <span>2. ¿Por cuál acceso?</span>
         <span style="color:${esDel?'#4ade80':'#60a5fa'}">${puertaActual}</span>
@@ -735,7 +735,6 @@ function vRegistro(){
         </button>
       </div>
 
-      <!-- BOTÓN GIGANTE -->
       <div class="tap-zone">
         <button class="btn-entry ${esDel ? 'btn-del' : 'btn-tras'}" onclick="entradaRapida(puertaActual, tipoActual)">
           ＋ REGISTRAR ENTRADA
@@ -743,7 +742,6 @@ function vRegistro(){
         </button>
       </div>
 
-      <!-- BOTONES RÁPIDOS 1-TOQUE -->
       <div class="row" style="margin-top:6px;gap:6px">
         <button class="btn sm" style="flex:1;background:var(--card);border:1px solid #1fb97877;color:#4ade80;font-weight:700;padding:9px" onclick="entradaRapida('Delantera','Estudiante')">
           ＋ Est. Delantera
@@ -803,12 +801,10 @@ function vRegistro(){
         </div>
 
         <div class="p-actions">
-          <!-- BOTÓN DIRECTO DE SALIDA -->
           <button class="btn warn sm" style="font-weight:700;padding:8px 14px" onclick="marcarSalida(${p.n})">
             🚪 MARCAR SALIDA
           </button>
 
-          <!-- BOTÓN DE SUBIDA AL PISO 2 -->
           ${!enP2 ? `
             <button class="btn purple sm" style="font-weight:700;padding:8px 12px" onclick="subirPiso2(${p.n})">
               🪜 Subió a Piso 2
@@ -817,7 +813,6 @@ function vRegistro(){
             <span class="badge purple" style="padding:6px 8px">Subió a las ${p.horaPiso2||'—'}</span>
           `}
 
-          <!-- ATENCIÓN EN VENTANILLA -->
           ${!p.B ? `
             <button class="btn sm blue" onclick="marcarPaso(${p.n},'B')">▶ Inició fila/atención</button>
           ` : (!p.C ? `
@@ -826,7 +821,6 @@ function vRegistro(){
             <span class="badge ok">Atendido</span>
           `)}
 
-          <!-- NOTA OPCIONAL -->
           <input class="p-tag-input" value="${esc(p.nombre||'')}" placeholder="Nota (opcional)" onchange="setPersonaTag(${p.n}, this.value)">
 
           <button class="btn sm ${p.obs==='AB'?'bad':''}" title="Abandonó la fila" onclick="setObsPersona(${p.n},'AB')">AB</button>
@@ -1005,23 +999,24 @@ function vResumen(){
   </div>`;
 }
 
-/* ================== VISTA: EXPORTAR (GESTIÓN SENCILLA DE SESIONES) ================== */
+/* ================== VISTA: EXPORTAR (GESTIÓN SENCILLA) ================== */
 function vDatos(){
   return `
   <div class="card">
     <h2>💾 Exportar Archivos para Entrega</h2>
     <p class="muted">El archivo se genera con el nombre oficial <b>${fname('xlsx')}</b> con las 5 hojas requeridas para el docente y la simulación.</p>
-    <div class="row" style="margin-bottom:12px">
+    <div class="row" style="margin-bottom:12px;gap:8px">
       <button class="btn pri" onclick="exportXLSX()">⬇ Descargar Excel Completo (${S.sessions.length} Sesiones)</button>
+      <button class="btn blue" onclick="compartirArchivo('xlsx')">📲 Enviar a WhatsApp / Drive</button>
       <button class="btn" onclick="exportCSV()">⬇ CSV General</button>
-      <button class="btn" onclick="exportJSON()">⬇ Respaldo JSON Completo</button>
+      <button class="btn" onclick="exportJSON()">⬇ Respaldo JSON</button>
       <label class="btn" style="margin:0;cursor:pointer">⬆ Restaurar JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(this.files[0])"></label>
     </div>
   </div>
 
   <div class="card">
     <h2>📁 Sesiones Guardadas (${S.sessions.length})</h2>
-    <p class="muted">Toca "Ver en Registro" para revisar o seguir editando cualquier sesión, o descárgala directamente en Excel o JSON:</p>
+    <p class="muted">Toca "Ver en Registro" para revisar cualquier sesión, o descárgala/envíatela directamente:</p>
     ${S.sessions.map(s => {
       const durac = s.inicio && s.fin ? dur(toS(s.fin)-toS(s.inicio)) : (s.inicio ? 'En curso' : 'Sin iniciar');
       const p2 = s.people.filter(p=>p.piso==='Piso 2').length;
@@ -1031,7 +1026,7 @@ function vDatos(){
         <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:6px">
           <div>
             <b>Sesión ${s.num}</b> · ${s.fecha} · <span class="badge ${s.fin?'ok':(s.inicio?'warn':'')}">${durac}</span>
-            ${esCur ? '<span class="badge blue" style="margin-left:4px">Seleccionada</span>' : ''}
+            ${esCur ? '<span class="badge blue" style="margin-left:4px">Activa</span>' : ''}
           </div>
           <div style="font-size:12px;color:var(--mut)">
             ${s.inicio ? s.inicio + ' a ' + (s.fin||'...') : 'Aún sin hora'}
@@ -1045,10 +1040,13 @@ function vDatos(){
             👁️ Ver en Registro
           </button>
           <button class="btn sm" onclick="exportXLSX(${s.id})">
-            ⬇ Excel Sesión ${s.num}
+            ⬇ Excel
+          </button>
+          <button class="btn blue sm" onclick="compartirArchivo('xlsx', ${s.id})">
+            📲 Enviar a WhatsApp / PC
           </button>
           <button class="btn sm" onclick="exportJSON(${s.id})">
-            💾 JSON Sesión ${s.num}
+            💾 JSON
           </button>
           <button class="btn sm bad" onclick="if(confirm('¿Borrar Sesión ${s.num}?')){S.sessions=S.sessions.filter(x=>x.id!==${s.id});if(!S.sessions.length)S.sessions=[crearNuevaSesionObj(1)];S.cur=S.sessions[0].id;save();render()}">
             🗑
@@ -1139,11 +1137,9 @@ function rowsLlegadas(targetSessionId = null){
   });
 }
 
-function exportXLSX(targetSessionId = null){
-  if(!window.XLSX){ toast('Sin librería Excel. Use CSV.'); return; }
+function generarWorkbook(targetSessionId = null){
   const wb = XLSX.utils.book_new(), c = S.cfg;
   const sesionesExportar = targetSessionId ? S.sessions.filter(s => s.id === targetSessionId) : S.sessions;
-  const sessObj = targetSessionId ? S.sessions.find(s => s.id === targetSessionId) : null;
 
   // HOJA 1: IDENTIFICACIÓN Y PARÁMETROS DEL BLOQUE (FORMATO 1)
   const f1 = [
@@ -1227,7 +1223,51 @@ function exportXLSX(targetSessionId = null){
   ];
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(tUnity), 'Consolidación Unity');
 
+  return wb;
+}
+
+function exportXLSX(targetSessionId = null){
+  if(!window.XLSX){ toast('Sin librería Excel. Use CSV.'); return; }
+  const wb = generarWorkbook(targetSessionId);
+  const sessObj = targetSessionId ? S.sessions.find(s => s.id === targetSessionId) : null;
   XLSX.writeFile(wb, fname('xlsx', sessObj ? sessObj.num : null));
+}
+
+async function compartirArchivo(tipo = 'xlsx', targetSessionId = null){
+  const ext = tipo === 'xlsx' ? 'xlsx' : 'json';
+  const sessObj = targetSessionId ? S.sessions.find(s=>s.id===targetSessionId) : null;
+  const filename = fname(ext, sessObj ? sessObj.num : null);
+
+  let blob;
+  if(tipo === 'xlsx'){
+    if(!window.XLSX){ toast('Sin librería Excel'); return; }
+    const wb = generarWorkbook(targetSessionId);
+    const u8 = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    blob = new Blob([u8], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  } else {
+    const data = targetSessionId ? { cfg: S.cfg, session: sessObj } : S;
+    blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
+  }
+
+  const file = new File([blob], filename, { type: blob.type });
+
+  if(navigator.canShare && navigator.canShare({ files: [file] })){
+    try {
+      await navigator.share({
+        title: 'Toma de Datos Uniguajira',
+        text: `Datos de ${S.cfg.bloque} (${filename})`,
+        files: [file]
+      });
+      toast('Compartido exitosamente');
+      return;
+    } catch(err) {
+      if(err.name === 'AbortError') return;
+    }
+  }
+
+  // Fallback a descarga normal en caso de no soportar compartir
+  dl(filename, blob, blob.type);
+  toast('Archivo descargado en tu dispositivo');
 }
 
 function dl(name, data, type){
@@ -1259,7 +1299,6 @@ function importJSON(f){
       if(!d.cfg && !d.session && !d.sessions) throw 0;
       if(confirm('¿Cargar datos del archivo JSON?')){
         if(d.session){
-          // Importar sesión individual
           const existe = S.sessions.findIndex(x => x.id === d.session.id);
           if(existe >= 0) S.sessions[existe] = d.session;
           else S.sessions.push(d.session);
