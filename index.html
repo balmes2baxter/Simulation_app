@@ -177,6 +177,8 @@ function crearNuevaSesionObj(num){
   return {
     id: Date.now(),
     num: num || 1,
+    titulo: '',
+    notas: '',
     fecha: d.toISOString().slice(0,10),
     dia: dias[d.getDay()],
     inicio: '',
@@ -613,6 +615,14 @@ function reabrirSesion(id){
   }
 }
 
+function setSessionTitulo(val){
+  const s = cur();
+  if(!s) return;
+  s.titulo = val;
+  s.notas = val;
+  save();
+}
+
 function cambiarSesion(id){
   S.cur = id;
   save();
@@ -844,7 +854,7 @@ function vRegistro(){
       <select onchange="cambiarSesion(+this.value)" style="padding:7px 10px;font-size:13px;font-weight:700">
         ${S.sessions.map(x => `
           <option value="${x.id}" ${x.id===s.id ? 'selected':''}>
-            Sesión ${x.num} · ${x.fin ? 'Cerrada ('+x.people.length+' pers)' : (x.inicio ? 'En curso' : 'Lista para Start')}
+            Sesión ${x.num}${x.titulo ? ' ('+esc(x.titulo)+')' : ''} · ${x.fin ? 'Cerrada ('+x.people.length+' pers)' : (x.inicio ? 'En curso' : 'Lista para Start')}
           </option>
         `).join('')}
       </select>
@@ -868,13 +878,19 @@ function vRegistro(){
   // ESTADO 1: NO INICIADA AÚN (BOTÓN START)
   if(!s.inicio){
     h += `
-    <div class="card" style="text-align:center;padding:22px 14px;background:linear-gradient(180deg,#14201b,#1c2f25);border:2px solid var(--pri)">
+    <div class="card" style="text-align:center;padding:20px 14px;background:linear-gradient(180deg,#14201b,#1c2f25);border:2px solid var(--pri)">
       <div style="font-size:36px;margin-bottom:6px">⏱️</div>
       <h2 style="justify-content:center;margin:0 0 6px;font-size:20px">Sesión ${s.num} · Lista para Iniciar</h2>
-      <div class="muted" style="margin-bottom:16px">
+      <div class="muted" style="margin-bottom:12px">
         <b>${esc(S.cfg.bloque)}</b><br>
         <span style="font-size:11px">P1: Vic. Extensión & Cs. Aplicadas · P2: ORI, Graduados & Docencia</span>
       </div>
+
+      <div style="margin:10px 0 16px;text-align:left">
+        <label style="font-size:12px;font-weight:700;color:#a3e6cb;margin-bottom:4px;display:block">📝 Nombre o notas de hoy (antes de iniciar):</label>
+        <input type="text" value="${esc(s.titulo || s.notas || '')}" placeholder="Ej: Notas de hoy, Jornada de la tarde..." oninput="setSessionTitulo(this.value)" style="background:#0b1511;font-size:15px;font-weight:600;padding:11px 12px;border-radius:10px;border:1.5px solid #1fb97899;width:100%;color:#fff;box-sizing:border-box">
+      </div>
+
       <button class="btn-start" onclick="iniciarSesion()">
         ▶ START · INICIAR TOMA DE DATOS
         <span>Toma la hora local exacta al pulsar</span>
@@ -898,6 +914,9 @@ function vRegistro(){
       <button class="btn bad sm" style="font-weight:700;padding:8px 14px;border-radius:9px" onclick="cerrarSesion()">
         ■ CERRAR SESIÓN
       </button>
+    </div>
+    <div style="margin:-4px 0 10px">
+      <input type="text" value="${esc(s.titulo || s.notas || '')}" placeholder="📝 Notas / Nombre de hoy..." oninput="setSessionTitulo(this.value)" style="background:var(--card2);font-size:13px;padding:7px 10px;border-radius:8px;border:1px solid var(--bd);width:100%;color:#fff;box-sizing:border-box" title="Puedes editar el nombre o notas de hoy en cualquier momento">
     </div>`;
 
     const nextCut = toS(s.inicio) + 600 * (s.cortes.length + 1);
@@ -1277,7 +1296,7 @@ function vDatos(){
       <div class="card" style="background:var(--card2);border:1px solid ${esCur?'var(--pri)':'var(--bd)'};padding:12px;margin-bottom:10px">
         <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:6px">
           <div>
-            <b>Sesión ${s.num}</b> · ${s.fecha} · <span class="badge ${s.fin?'ok':(s.inicio?'warn':'')}">${durac}</span>
+            <b>Sesión ${s.num}${s.titulo ? ' · ' + esc(s.titulo) : ''}</b> · ${s.fecha} · <span class="badge ${s.fin?'ok':(s.inicio?'warn':'')}">${durac}</span>
             ${esCur ? '<span class="badge blue" style="margin-left:4px">Activa</span>' : ''}
           </div>
           <div style="font-size:12px;color:var(--mut)">
@@ -1439,7 +1458,8 @@ function generarWorkbook(targetSessionId = null){
 
   // HOJA 4: RESUMEN DE LA SESIÓN (FORMATO 4)
   const res = [
-    ['FORMATO 4: Resumen de la sesión', ...sesionesExportar.map(s => 'Sesión ' + s.num)],
+    ['FORMATO 4: Resumen de la sesión', ...sesionesExportar.map(s => 'Sesión ' + s.num + (s.titulo ? ' (' + s.titulo + ')' : ''))],
+    ['Notas / Título de la sesión', ...sesionesExportar.map(s => s.titulo || s.notas || '—')],
     ['Fecha y día', ...sesionesExportar.map(s => s.fecha + ' (' + s.dia + ')')],
     ['Hora inicio (START)', ...sesionesExportar.map(s => s.inicio || '—')],
     ['Hora fin (CIERRE)', ...sesionesExportar.map(s => s.fin || '—')],
