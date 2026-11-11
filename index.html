@@ -354,7 +354,9 @@ async function descargarDesdeSupabase(manual = false){
         const locS = S.sessions[idx];
         const remP = (remS.people||[]).length;
         const locP = (locS.people||[]).length;
-        if(remP > locP || (remP === locP && remS.fin && !locS.fin)){
+        const remD = (remS.people||[]).filter(p=>p.D).length;
+        const locD = (locS.people||[]).filter(p=>p.D).length;
+        if(remP > locP || (remP === locP && remD > locD) || (remP === locP && remS.fin && !locS.fin)){
           S.sessions[idx] = remS;
           cambios++;
         }
@@ -482,11 +484,14 @@ function calcSession(s){
   if(!s) return {};
   const c = +S.cfg.c || 1;
   const P = s.people || [];
-  const arr = P.filter(p=>p.obs!=='PE' && toS(p.A)!=null).map(p=>toS(p.A)).sort((a,b)=>a-b);
+  const llegadasReales = P.filter(p => !p.previo && p.obs !== 'YA_ESTABA');
+  const previas = P.filter(p => p.previo || p.obs === 'YA_ESTABA');
+
+  const arr = llegadasReales.filter(p=>p.obs!=='PE' && toS(p.A)!=null).map(p=>toS(p.A)).sort((a,b)=>a-b);
   const inter = [];
   for(let i=1; i<arr.length; i++) inter.push(arr[i]-arr[i-1]);
 
-  const comp = P.filter(p => toS(p.A)!=null && toS(p.D)!=null);
+  const comp = llegadasReales.filter(p => toS(p.A)!=null && toS(p.D)!=null);
   const w = comp.map(p => toS(p.D) - toS(p.A));
   
   const conAtencion = P.filter(p => toS(p.A)!=null && toS(p.B)!=null && toS(p.C)!=null);
@@ -500,10 +505,10 @@ function calcSession(s){
   const colas = (s.cortes||[]).map(k=>+k.cola).filter(x=>!isNaN(x));
   const ocup = (s.cortes||[]).map(k=>+k.ocup).filter(x=>!isNaN(x));
 
-  const adentro = P.filter(p => p.A && !p.D && p.obs !== 'AB' && p.obs !== 'PE').length;
+  const adentro = P.filter(p => !p.D && p.obs !== 'AB' && p.obs !== 'PE').length;
 
-  const del = P.filter(p => (p.puerta || 'Delantera') === 'Delantera').length;
-  const tras = P.filter(p => p.puerta === 'Trasera').length;
+  const del = llegadasReales.filter(p => (p.puerta || 'Delantera') === 'Delantera').length;
+  const tras = llegadasReales.filter(p => p.puerta === 'Trasera').length;
 
   const est = P.filter(p => (p.tipo || 'Estudiante') === 'Estudiante').length;
   const func = P.filter(p => p.tipo === 'Funcionario').length;
@@ -520,7 +525,9 @@ function calcSession(s){
   const wEscalera = avg(conEscalera.map(p => toS(p.horaPiso2) - toS(p.A)));
 
   return {
-    total: P.length,
+    total: llegadasReales.length,
+    totalRegistros: P.length,
+    salidasPrevias: previas.length,
     validas: arr.length,
     comp: comp.length,
     adentro,
@@ -669,6 +676,79 @@ function entradaRapida(puerta = null, tipo = null, tag = ''){
   render();
 }
 
+function salidaDirectaPrevia(puerta = null, tipo = null, piso = 'Piso 1'){
+  const s = cur();
+  if(s.fin){
+    toast('Esta sesión ya está cerrada. Reábrela o crea una nueva.');
+    return;
+  }
+  if(!s.inicio) s.inicio = nowT();
+
+  const pFinal = puerta || puertaActual || 'Delantera';
+  const tFinal = tipo || tipoActual || 'Estudiante';
+  puertaActual = pFinal;
+  tipoActual = tFinal;
+
+  const n = s.people.length + 1;
+  const hSal = nowT();
+  s.people.push({
+    n,
+    puerta: pFinal,
+    tipo: tFinal,
+    piso: piso || 'Piso 1',
+    horaPiso2: '',
+    nombre: 'Ya estaba en el bloque',
+    previo: true,
+    A: '',
+    B: '',
+    C: '',
+    D: hSal,
+    serv: '1',
+    obs: 'YA_ESTABA',
+    seg: false
+  });
+  save();
+  vib([45, 35]);
+  beep(660, .1);
+  toast(`🚪 Salida #${n} registrada (Ya estaba adentro · ${pFinal})`);
+  render();
+}
+
+function agregarAdentroPrevio(puerta = null, tipo = null){
+  const s = cur();
+  if(s.fin){
+    toast('Esta sesión ya está cerrada.');
+    return;
+  }
+  if(!s.inicio) s.inicio = nowT();
+
+  const pFinal = puerta || puertaActual || 'Delantera';
+  const tFinal = tipo || tipoActual || 'Estudiante';
+
+  const n = s.people.length + 1;
+  s.people.push({
+    n,
+    puerta: pFinal,
+    tipo: tFinal,
+    piso: 'Piso 1',
+    horaPiso2: '',
+    nombre: 'Ya estaba adentro',
+    previo: true,
+    A: '',
+    B: '',
+    C: '',
+    D: '',
+    serv: '1',
+    obs: 'YA_ESTABA',
+    seg: false
+  });
+  save();
+  vib(40);
+  beep(950, .08);
+  toast(`👤 #${n} agregado adentro (Ya estaba antes de iniciar)`);
+  render();
+}
+
 function subirPiso2(n){
   const s = cur();
   const p = s.people.find(x => x.n === n);
@@ -678,8 +758,9 @@ function subirPiso2(n){
   save();
   vib([40, 40]);
   beep(1350, .09);
-  const tDesdeEntrada = toS(p.horaPiso2) - toS(p.A);
-  toast(`Persona #${n} subió al Piso 2 (tardó ${dur(tDesdeEntrada)})`);
+  const refA = toS(p.A) ?? toS(s.inicio);
+  const tDesdeEntrada = refA != null ? toS(p.horaPiso2) - refA : null;
+  toast(`Persona #${n} subió al Piso 2${tDesdeEntrada!=null ? ' ('+dur(tDesdeEntrada)+')' : ''}`);
   render();
 }
 
@@ -728,8 +809,9 @@ function marcarSalida(n){
   save();
   vib(50);
   beep(750, .09);
-  const estancia = toS(p.D) - toS(p.A);
-  toast(`Salida #${n} (${p.piso}) · Estancia: ${dur(estancia)}`);
+  const refA = toS(p.A);
+  const estancia = refA != null ? toS(p.D) - refA : null;
+  toast(`Salida #${n} (${p.piso})${estancia!=null ? ' · Estancia: '+dur(estancia) : ' · Ya estaba adentro'}`);
   render();
 }
 
@@ -842,7 +924,7 @@ function guardarBloqueRapido(){
 function vRegistro(){
   const s = cur();
   const k = calcSession(s);
-  const adentroList = s.people.filter(p => p.A && !p.D && p.obs !== 'AB' && p.obs !== 'PE');
+  const adentroList = s.people.filter(p => !p.D && p.obs !== 'AB' && p.obs !== 'PE');
   const nowSeg = toS(nowT());
 
   let h = '';
@@ -1006,6 +1088,26 @@ function vRegistro(){
           ＋ Funcionario
         </button>
       </div>
+
+      <div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--bd)">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#fbbf24;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px">
+          <span>🚪 ¿Sale alguien que YA ESTABA en el bloque? (${k.salidasPrevias || 0})</span>
+        </div>
+        <button class="btn warn" style="width:100%;font-weight:800;padding:12px;font-size:14px;border-radius:12px;margin-bottom:6px" onclick="salidaDirectaPrevia(puertaActual, tipoActual)">
+          🚪 SALIDA DIRECTA · YA ESTABA ADENTRO (${puertaActual} · ${tipoActual})
+        </button>
+        <div class="row" style="gap:6px">
+          <button class="btn sm" style="flex:1;background:var(--card);border:1px solid #f0b42977;color:#fbbf24;font-weight:700;padding:8px" onclick="salidaDirectaPrevia('Delantera', tipoActual)">
+            🚪 Ya estaba · Delantera
+          </button>
+          <button class="btn sm" style="flex:1;background:var(--card);border:1px solid #f0b42977;color:#fbbf24;font-weight:700;padding:8px" onclick="salidaDirectaPrevia('Trasera', tipoActual)">
+            🚪 Ya estaba · Trasera
+          </button>
+          <button class="btn sm" style="flex:1;background:var(--card);border:1px solid #a855f777;color:#c084fc;font-weight:700;padding:8px" onclick="agregarAdentroPrevio(puertaActual, tipoActual)" title="Ponerlo en la lista de adentro para seguirlo o marcarle salida después">
+            👤+ Poner Adentro
+          </button>
+        </div>
+      </div>
     </div>`;
   }
 
@@ -1013,7 +1115,7 @@ function vRegistro(){
   if(s.people.length > 0 && !s.fin){
     h += `
     <div class="row" style="justify-content:flex-end;margin-bottom:10px">
-      <button class="btn sm bad" onclick="deshacerUltima()">↶ Deshacer última llegada</button>
+      <button class="btn sm bad" onclick="deshacerUltima()">↶ Deshacer último registro</button>
     </div>`;
   }
 
@@ -1028,7 +1130,8 @@ function vRegistro(){
     h += `<p class="muted" style="text-align:center;padding:16px 0">${s.fin ? 'Sesión cerrada sin personas activas.' : 'No hay nadie dentro ahora mismo.<br>Toca <b>＋ REGISTRAR ENTRADA</b> cuando alguien llegue.'}</p>`;
   } else {
     adentroList.slice().reverse().forEach(p => {
-      const transcurrido = nowSeg ? nowSeg - toS(p.A) : 0;
+      const refT = toS(p.A) ?? toS(s.inicio);
+      const transcurrido = (nowSeg && refT != null) ? nowSeg - refT : 0;
       const esT = (p.puerta === 'Trasera');
       const esFunc = (p.tipo === 'Funcionario');
       const enP2 = (p.piso === 'Piso 2');
@@ -1049,7 +1152,7 @@ function vRegistro(){
             </span>
           </div>
           <div class="p-time">
-            Entró: <b>${p.A}</b> · <span class="badge ${p.C?'ok':(p.B?'warn':'ok')}">${dur(transcurrido)}</span>
+            ${p.previo && !p.A ? '<b>Ya estaba</b>' : `Entró: <b>${p.A}</b>`} · <span class="badge ${p.C?'ok':(p.B?'warn':'ok')}">${dur(transcurrido)}</span>
           </div>
         </div>
 
@@ -1107,7 +1210,7 @@ function vRegistro(){
         </thead>
         <tbody>
           ${s.people.slice().reverse().map(p => {
-            const estancia = toS(p.A)!=null && toS(p.D)!=null ? dur(toS(p.D)-toS(p.A)) : '—';
+            const estancia = toS(p.A)!=null && toS(p.D)!=null ? dur(toS(p.D)-toS(p.A)) : (p.previo ? 'Previo' : '—');
             const esT = (p.puerta === 'Trasera');
             const esFunc = (p.tipo === 'Funcionario');
             const enP2 = (p.piso === 'Piso 2');
@@ -1117,7 +1220,7 @@ function vRegistro(){
               <td><span class="badge ${esFunc ? 'purple' : 'ok'}">${p.tipo||'Estudiante'}</span></td>
               <td><span class="badge ${esT ? 'blue' : 'ok'}">${p.puerta||'Delantera'}</span></td>
               <td><span class="badge ${enP2 ? 'purple' : 'warn'}">${p.piso||'Piso 1'}</span></td>
-              <td>${p.A||'—'}</td>
+              <td>${p.A || (p.previo ? '<span class="badge warn">Ya estaba</span>' : '—')}</td>
               <td>${p.horaPiso2||'—'}</td>
               <td>${p.D||'<span class="badge warn">Adentro</span>'}</td>
               <td>${estancia}</td>
@@ -1390,7 +1493,7 @@ function rowsLlegadas(targetSessionId = null){
       'Día': p.s.dia,
       'Bloque': S.cfg.bloque,
       'N°': p.n,
-      'A. Llegada': p.A,
+      'A. Llegada': p.A || (p.previo ? 'Ya estaba en bloque' : ''),
       'B. Inicio atención': p.B,
       'C. Fin atención': p.C,
       'D. Salida': p.D,
