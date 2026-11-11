@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#0b3d2e">
 <title>Registro Bloque Administrativo · Uniguajira</title>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#0c1411;--card:#14201b;--card2:#1c2d26;--card3:#243a31;--txt:#e9f3ee;--mut:#8fa69b;--pri:#1fb978;--pri2:#15915d;--warn:#f0b429;--bad:#e5484d;--blue:#3b82f6;--purple:#a855f7;--bd:#263830}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -101,6 +102,10 @@ th{color:var(--mut);font-weight:600;background:var(--card)}
 .muted{color:var(--mut);font-size:12px}
 .modal{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
 .modal-body{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;width:100%;max-width:400px}
+.cloud-pill{display:inline-flex;align-items:center;gap:4px;background:var(--card2);border:1px solid #1fb97866;border-radius:20px;padding:4px 8px;font-size:11px;font-weight:700;color:#4ade80;cursor:pointer;white-space:nowrap;user-select:none;transition:all .2s ease}
+.cloud-pill.syncing{border-color:#3b82f688;color:#60a5fa}
+.cloud-pill.offline{border-color:#f0b42988;color:#fbbf24}
+.cloud-pill.error{border-color:#e5484d88;color:#f87171}
 </style>
 </head>
 <body>
@@ -108,6 +113,9 @@ th{color:var(--mut);font-weight:600;background:var(--card)}
   <div class="hdr-main">
     <div class="bloque-chip" onclick="abrirCambioBloque()" title="Cambiar bloque">
       🏢 <span id="hBloque">Bloque Administrativo A</span> ✏️
+    </div>
+    <div id="cloudPill" class="cloud-pill" onclick="sincronizarSupabase(true)" title="Toca para sincronizar con Supabase">
+      <span id="cloudDot">🟢</span> <span id="cloudTxt">Nube OK</span>
     </div>
   </div>
   <div id="clock">--:--:--</div>
@@ -193,7 +201,233 @@ let tab = 'registro';
 let puertaActual = 'Delantera';
 let tipoActual = 'Estudiante';
 
-const save = () => localStorage.setItem(KEY, JSON.stringify(S));
+/* ================== CONEXIÓN SUPABASE EN TIEMPO REAL ================== */
+const SB_URL = 'https://mljrlfxhyjegrmqdbscp.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sanJsZnhoeWplZ3JtcWRic2NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1Njc4OTEsImV4cCI6MjEwOTE0Mzg5MX0.IFdEzlOgzxXba6K_l3s3OgurscfPn0ce9z-9uiS2FVE';
+const SB_TABLE = 'simulacion_bloques';
+
+let sb = null;
+try {
+  if(window.supabase && typeof window.supabase.createClient === 'function'){
+    sb = window.supabase.createClient(SB_URL, SB_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+  }
+} catch(err){
+  console.warn('Init Supabase:', err);
+}
+
+let syncStatus = 'ok';
+let syncTimer = null;
+let lastSyncTime = null;
+
+function setCloudStatus(st, msg = null){
+  syncStatus = st;
+  const pill = document.getElementById('cloudPill');
+  const dot = document.getElementById('cloudDot');
+  const txt = document.getElementById('cloudTxt');
+  const cardB = document.getElementById('cloudCardBadge');
+  if(!pill || !dot || !txt) return;
+
+  pill.className = 'cloud-pill ' + st;
+  if(st === 'syncing'){
+    dot.textContent = '🔄';
+    txt.textContent = msg || 'Guardando...';
+    if(cardB){ cardB.className = 'badge blue'; cardB.textContent = '🔄 Sincronizando...'; }
+  } else if(st === 'ok'){
+    dot.textContent = '🟢';
+    txt.textContent = msg || 'Nube OK';
+    pill.title = `Sincronizado con Supabase (${lastSyncTime || 'al día'})`;
+    if(cardB){ cardB.className = 'badge ok'; cardB.textContent = '🟢 Conectado a Supabase'; }
+  } else if(st === 'offline'){
+    dot.textContent = '🟡';
+    txt.textContent = msg || 'Solo Local';
+    pill.title = 'Sin conexión a internet. Los datos están seguros en este celular.';
+    if(cardB){ cardB.className = 'badge warn'; cardB.textContent = '🟡 Sin Internet (Guardado Local)'; }
+  } else if(st === 'error'){
+    dot.textContent = '🔴';
+    txt.textContent = msg || 'Reintentar';
+    pill.title = 'Error de conexión. Toca para reintentar sincronizar.';
+    if(cardB){ cardB.className = 'badge bad'; cardB.textContent = '🔴 Error de Conexión'; }
+  }
+}
+
+async function upsertSesionRemota(s){
+  const row = {
+    id: 'sess_' + s.id,
+    num: s.num,
+    bloque: S.cfg.bloque || 'Bloque Administrativo A',
+    fecha: s.fecha || new Date().toISOString().slice(0,10),
+    data: {
+      cfg: S.cfg,
+      session: s,
+      savedAt: new Date().toISOString()
+    },
+    updated_at: new Date().toISOString()
+  };
+
+  if(sb){
+    const { error } = await sb.from(SB_TABLE).upsert(row, { onConflict: 'id' });
+    if(error) throw error;
+    return true;
+  }
+
+  const res = await fetch(`${SB_URL}/rest/v1/${SB_TABLE}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': `Bearer ${SB_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates'
+    },
+    body: JSON.stringify(row)
+  });
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  return true;
+}
+
+async function sincronizarSupabase(manual = false){
+  if(!navigator.onLine){
+    setCloudStatus('offline');
+    if(manual) toast('Sin internet: guardado en este dispositivo');
+    return;
+  }
+
+  setCloudStatus('syncing');
+  if(manual) toast('Subiendo datos a Supabase...');
+
+  try {
+    for(const s of S.sessions){
+      await upsertSesionRemota(s);
+    }
+    lastSyncTime = nowT();
+    setCloudStatus('ok', 'Nube OK');
+    if(manual) toast(`✔ ${S.sessions.length} sesión(es) respaldadas en Supabase`);
+  } catch(err){
+    console.error('Error sincronizando con Supabase:', err);
+    setCloudStatus('error', 'Error Nube');
+    if(manual) toast('Error al conectar con Supabase. Revisa tu señal.');
+  }
+}
+
+async function descargarDesdeSupabase(manual = false){
+  if(!navigator.onLine){
+    if(manual) toast('Sin internet: no se puede consultar Supabase');
+    return;
+  }
+
+  setCloudStatus('syncing', 'Descargando...');
+  if(manual) toast('Consultando sesiones en Supabase...');
+
+  try {
+    let remoteRows = [];
+    if(sb){
+      const { data, error } = await sb.from(SB_TABLE).select('*').order('num', { ascending: true });
+      if(error) throw error;
+      remoteRows = data || [];
+    } else {
+      const res = await fetch(`${SB_URL}/rest/v1/${SB_TABLE}?select=*&order=num.asc`, {
+        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+      });
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      remoteRows = await res.json();
+    }
+
+    if(!remoteRows || !remoteRows.length){
+      setCloudStatus('ok');
+      if(manual) toast('No hay sesiones previas en Supabase');
+      return;
+    }
+
+    let cambios = 0;
+    remoteRows.forEach(row => {
+      const remS = row.data && row.data.session;
+      if(!remS) return;
+
+      const idx = S.sessions.findIndex(x => x.id === remS.id);
+      if(idx === -1){
+        S.sessions.push(remS);
+        cambios++;
+      } else {
+        const locS = S.sessions[idx];
+        const remP = (remS.people||[]).length;
+        const locP = (locS.people||[]).length;
+        if(remP > locP || (remP === locP && remS.fin && !locS.fin)){
+          S.sessions[idx] = remS;
+          cambios++;
+        }
+      }
+
+      if(row.data && row.data.cfg){
+        S.cfg = { ...S.cfg, ...row.data.cfg };
+      }
+    });
+
+    if(cambios > 0){
+      localStorage.setItem(KEY, JSON.stringify(S));
+      render();
+      if(manual) toast(`✔ Se actualizaron ${cambios} sesiones desde Supabase`);
+    } else if(manual){
+      toast('✔ Sesiones ya sincronizadas con la nube');
+    }
+
+    lastSyncTime = nowT();
+    setCloudStatus('ok');
+  } catch(err){
+    console.error('Error descargando de Supabase:', err);
+    setCloudStatus('error');
+    if(manual) toast('Error al traer datos de Supabase');
+  }
+}
+
+function triggerAutoSync(){
+  clearTimeout(syncTimer);
+  setCloudStatus('syncing', 'Guardando...');
+  syncTimer = setTimeout(() => {
+    sincronizarSupabase(false);
+  }, 1200);
+}
+
+async function borrarSesion(id, num){
+  if(!confirm(`¿Borrar definitivamente la Sesión ${num}?`)) return;
+  S.sessions = S.sessions.filter(x => x.id !== id);
+  if(!S.sessions.length){
+    const s0 = crearNuevaSesionObj(1);
+    S.sessions = [s0];
+    S.cur = s0.id;
+  } else if(S.cur === id){
+    S.cur = S.sessions[0].id;
+  }
+  save();
+  render();
+
+  try {
+    if(sb){
+      await sb.from(SB_TABLE).delete().eq('id', 'sess_' + id);
+    } else {
+      await fetch(`${SB_URL}/rest/v1/${SB_TABLE}?id=eq.sess_${id}`, {
+        method: 'DELETE',
+        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+      });
+    }
+  } catch(e){
+    console.warn('Error borrando en Supabase:', e);
+  }
+  toast(`Sesión ${num} eliminada`);
+}
+
+window.addEventListener('online', () => {
+  toast('📡 Conexión restaurada: sincronizando con Supabase...');
+  sincronizarSupabase(false);
+});
+window.addEventListener('offline', () => {
+  setCloudStatus('offline');
+});
+
+const save = () => {
+  localStorage.setItem(KEY, JSON.stringify(S));
+  triggerAutoSync();
+};
 const cur = () => S.sessions.find(s => s.id === S.cur) || S.sessions[S.sessions.length - 1];
 const $ = s => document.querySelector(s);
 const pad = n => String(n).padStart(2, '0');
@@ -1002,6 +1236,24 @@ function vResumen(){
 /* ================== VISTA: EXPORTAR (GESTIÓN SENCILLA) ================== */
 function vDatos(){
   return `
+  <div class="card" style="background:#0c251a;border:1px solid #1fb97877">
+    <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:6px">
+      <h2 style="margin:0;color:#a3e6cb">☁️ Nube Supabase (Tiempo Real)</h2>
+      <span class="badge ok" id="cloudCardBadge">🟢 Conectado</span>
+    </div>
+    <p class="muted" style="margin-bottom:10px">
+      Cada llegada, salida y corte se respalda automáticamente en la base de datos de <b>Supabase</b>. Puedes registrar datos en tu celular en la universidad y abrirlos al instante en tu computador.
+    </p>
+    <div class="row" style="gap:8px;flex-wrap:wrap">
+      <button class="btn pri sm" onclick="sincronizarSupabase(true)">
+        ☁️ Subir / Forzar Respaldo Nube
+      </button>
+      <button class="btn blue sm" onclick="descargarDesdeSupabase(true)">
+        ⬇️ Traer Sesiones de Supabase
+      </button>
+    </div>
+  </div>
+
   <div class="card">
     <h2>💾 Exportar Archivos para Entrega</h2>
     <p class="muted">El archivo se genera con el nombre oficial <b>${fname('xlsx')}</b> con las 5 hojas requeridas para el docente y la simulación.</p>
@@ -1048,7 +1300,7 @@ function vDatos(){
           <button class="btn sm" onclick="exportJSON(${s.id})">
             💾 JSON
           </button>
-          <button class="btn sm bad" onclick="if(confirm('¿Borrar Sesión ${s.num}?')){S.sessions=S.sessions.filter(x=>x.id!==${s.id});if(!S.sessions.length)S.sessions=[crearNuevaSesionObj(1)];S.cur=S.sessions[0].id;save();render()}">
+          <button class="btn sm bad" onclick="borrarSesion(${s.id}, ${s.num})">
             🗑
           </button>
         </div>
@@ -1366,6 +1618,11 @@ setInterval(() => {
 }, 1000);
 
 render();
+
+// Cargar/sincronizar con Supabase en segundo plano al iniciar
+setTimeout(() => {
+  descargarDesdeSupabase(false);
+}, 600);
 </script>
 </body>
 </html>
