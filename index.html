@@ -1092,19 +1092,31 @@ function vRegistro(){
       <div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--bd)">
         <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#fbbf24;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px">
           <span>🚪 ¿Sale alguien que YA ESTABA en el bloque? (${k.salidasPrevias || 0})</span>
+          <span style="color:var(--mut);font-size:10px">Estudiante o Funcionario</span>
         </div>
-        <button class="btn warn" style="width:100%;font-weight:800;padding:12px;font-size:14px;border-radius:12px;margin-bottom:6px" onclick="salidaDirectaPrevia(puertaActual, tipoActual)">
-          🚪 SALIDA DIRECTA · YA ESTABA ADENTRO (${puertaActual} · ${tipoActual})
-        </button>
-        <div class="row" style="gap:6px">
-          <button class="btn sm" style="flex:1;background:var(--card);border:1px solid #f0b42977;color:#fbbf24;font-weight:700;padding:8px" onclick="salidaDirectaPrevia('Delantera', tipoActual)">
-            🚪 Ya estaba · Delantera
+        <div class="row" style="gap:6px;margin-bottom:6px">
+          <button class="btn warn" style="flex:1;font-weight:800;padding:11px 8px;font-size:13px;border-radius:11px" onclick="salidaDirectaPrevia(puertaActual, 'Estudiante')">
+            🎓 Salida Estudiante<br><small style="font-weight:600;opacity:.85">Ya estaba · ${puertaActual}</small>
           </button>
-          <button class="btn sm" style="flex:1;background:var(--card);border:1px solid #f0b42977;color:#fbbf24;font-weight:700;padding:8px" onclick="salidaDirectaPrevia('Trasera', tipoActual)">
-            🚪 Ya estaba · Trasera
+          <button class="btn" style="flex:1;background:#a855f733;border:1.5px solid #a855f7aa;color:#e9d5ff;font-weight:800;padding:11px 8px;font-size:13px;border-radius:11px" onclick="salidaDirectaPrevia(puertaActual, 'Funcionario')">
+            💼 Salida Funcionario<br><small style="font-weight:600;opacity:.85">Ya estaba · ${puertaActual}</small>
           </button>
-          <button class="btn sm" style="flex:1;background:var(--card);border:1px solid #a855f777;color:#c084fc;font-weight:700;padding:8px" onclick="agregarAdentroPrevio(puertaActual, tipoActual)" title="Ponerlo en la lista de adentro para seguirlo o marcarle salida después">
-            👤+ Poner Adentro
+        </div>
+        <div class="row" style="gap:5px">
+          <button class="btn sm" style="flex:1;background:var(--card);border:1px solid #f0b42977;color:#fbbf24;font-weight:700;padding:7px 4px" onclick="salidaDirectaPrevia('Delantera', 'Estudiante')">
+            🎓 Est · Del
+          </button>
+          <button class="btn sm" style="flex:1;background:var(--card);border:1px solid #f0b42977;color:#fbbf24;font-weight:700;padding:7px 4px" onclick="salidaDirectaPrevia('Trasera', 'Estudiante')">
+            🎓 Est · Tras
+          </button>
+          <button class="btn sm" style="flex:1;background:var(--card);border:1px solid #a855f777;color:#c084fc;font-weight:700;padding:7px 4px" onclick="salidaDirectaPrevia('Delantera', 'Funcionario')">
+            💼 Func · Del
+          </button>
+          <button class="btn sm" style="flex:1;background:var(--card);border:1px solid #a855f777;color:#c084fc;font-weight:700;padding:7px 4px" onclick="salidaDirectaPrevia('Trasera', 'Funcionario')">
+            💼 Func · Tras
+          </button>
+          <button class="btn sm" style="background:var(--card);border:1px solid var(--bd);color:var(--txt);font-weight:700;padding:7px 8px" onclick="agregarAdentroPrevio(puertaActual, tipoActual)" title="Ponerlo en la lista de adentro (${tipoActual}) para seguirlo o marcarle salida después">
+            👤+ Adentro
           </button>
         </div>
       </div>
@@ -1217,9 +1229,9 @@ function vRegistro(){
             return `
             <tr>
               <td><b>#${p.n}</b> ${esc(p.nombre||'')}</td>
-              <td><span class="badge ${esFunc ? 'purple' : 'ok'}">${p.tipo||'Estudiante'}</span></td>
-              <td><span class="badge ${esT ? 'blue' : 'ok'}">${p.puerta||'Delantera'}</span></td>
-              <td><span class="badge ${enP2 ? 'purple' : 'warn'}">${p.piso||'Piso 1'}</span></td>
+              <td><span class="badge ${esFunc ? 'purple' : 'ok'}" onclick="toggleTipoPersona(${p.n})" style="cursor:pointer" title="Toca para cambiar entre Estudiante y Funcionario">${p.tipo||'Estudiante'}</span></td>
+              <td><span class="badge ${esT ? 'blue' : 'ok'}" onclick="togglePuertaPersona(${p.n})" style="cursor:pointer" title="Toca para cambiar puerta">${p.puerta||'Delantera'}</span></td>
+              <td><span class="badge ${enP2 ? 'purple' : 'warn'}" onclick="togglePisoPersona(${p.n})" style="cursor:pointer" title="Toca para cambiar piso">${p.piso||'Piso 1'}</span></td>
               <td>${p.A || (p.previo ? '<span class="badge warn">Ya estaba</span>' : '—')}</td>
               <td>${p.horaPiso2||'—'}</td>
               <td>${p.D||'<span class="badge warn">Adentro</span>'}</td>
