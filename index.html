@@ -480,6 +480,46 @@ function beep(f=880, d=.12){
 function vib(p=35){ if(navigator.vibrate) navigator.vibrate(p); }
 
 /* ================== CÁLCULOS INTEGRALES ================== */
+function obtenerCortesEfectivos(s){
+  if(!s) return [];
+  if(s.cortes && s.cortes.length > 0) return s.cortes;
+  const P = s.people || [];
+  const arr = P.filter(p => !p.previo && p.obs !== 'YA_ESTABA' && toS(p.A) != null).map(p => toS(p.A)).sort((a,b)=>a-b);
+  const ini = toS(s.inicio) ?? (arr.length ? arr[0] : null);
+  if(ini == null || P.length === 0) return [];
+  const c = +S.cfg.c || 1;
+  const autoCortes = [];
+  for(let i=1; i<=6; i++){
+    const tprev = ini + (i-1)*600;
+    const tcut = ini + i*600;
+    const lleg = P.filter(p => {
+      const a = toS(p.A);
+      return !p.previo && p.obs !== 'YA_ESTABA' && a != null && a > tprev && a <= tcut;
+    }).length;
+    const adentroEnT = P.filter(p => {
+      const a = toS(p.A);
+      const d = toS(p.D);
+      if(p.previo || p.obs === 'YA_ESTABA') return d == null || d > tcut;
+      return a != null && a <= tcut && (d == null || d > tcut);
+    }).length;
+    const enColaEnT = P.filter(p => {
+      const a = toS(p.A);
+      const b = toS(p.B);
+      const cFin = toS(p.C) ?? toS(p.D);
+      return a != null && a <= tcut && ((b != null && b > tcut) || (b != null && b <= tcut && (cFin == null || cFin > tcut)));
+    }).length;
+    autoCortes.push({
+      n: i,
+      hora: fromS(tcut),
+      llegadas: lleg,
+      cola: Math.max(0, enColaEnT > 0 ? enColaEnT - c : Math.min(3, Math.max(0, adentroEnT - c))),
+      ocup: Math.min(Math.max(adentroEnT, enColaEnT), c),
+      libres: Math.max(0, c - Math.min(Math.max(adentroEnT, enColaEnT), c))
+    });
+  }
+  return autoCortes;
+}
+
 function calcSession(s){
   if(!s) return {};
   const c = +S.cfg.c || 1;
@@ -502,19 +542,21 @@ function calcSession(s){
   const fin = toS(s.fin) ?? (toS(nowT()));
   const durMin = ini!=null && fin!=null ? Math.max(1, (fin-ini)/60) : null;
 
-  const colas = (s.cortes||[]).map(k=>+k.cola).filter(x=>!isNaN(x));
-  const ocup = (s.cortes||[]).map(k=>+k.ocup).filter(x=>!isNaN(x));
+  const cortesEf = obtenerCortesEfectivos(s);
+  const colas = cortesEf.map(k=>+k.cola).filter(x=>!isNaN(x));
+  const ocup = cortesEf.map(k=>+k.ocup).filter(x=>!isNaN(x));
 
   const adentro = P.filter(p => !p.D && p.obs !== 'AB' && p.obs !== 'PE').length;
 
   const del = llegadasReales.filter(p => (p.puerta || 'Delantera') === 'Delantera').length;
   const tras = llegadasReales.filter(p => p.puerta === 'Trasera').length;
 
-  const est = P.filter(p => (p.tipo || 'Estudiante') === 'Estudiante').length;
-  const func = P.filter(p => p.tipo === 'Funcionario').length;
+  const baseAgentes = llegadasReales.length ? llegadasReales : P;
+  const est = baseAgentes.filter(p => (p.tipo || 'Estudiante') === 'Estudiante').length;
+  const func = baseAgentes.filter(p => p.tipo === 'Funcionario').length;
 
-  const piso2 = P.filter(p => p.piso === 'Piso 2').length;
-  const piso1 = P.length - piso2;
+  const piso2 = baseAgentes.filter(p => p.piso === 'Piso 2').length;
+  const piso1 = baseAgentes.length - piso2;
 
   const compP1 = comp.filter(p => p.piso !== 'Piso 2');
   const compP2 = comp.filter(p => p.piso === 'Piso 2');
@@ -537,7 +579,7 @@ function calcSession(s){
     func,
     piso1,
     piso2,
-    pctPiso2: P.length ? Math.round((piso2/P.length)*100) : 0,
+    pctPiso2: baseAgentes.length ? Math.round((piso2/baseAgentes.length)*100) : 0,
     wPiso1,
     wPiso2,
     wEscalera,
@@ -557,7 +599,7 @@ function calcSession(s){
     colaProm: avg(colas),
     colaMax: colas.length ? Math.max(...colas) : null,
     util: ocup.length ? avg(ocup)/c : null,
-    cortes: (s.cortes||[]).length
+    cortes: cortesEf.length
   };
 }
 
@@ -1250,45 +1292,50 @@ function vRegistro(){
 /* ================== VISTA: CORTES CADA 10 MIN ================== */
 function vCortes(){
   const s = cur();
+  const cortesMostrar = obtenerCortesEfectivos(s);
+  const esAuto = (!s.cortes || s.cortes.length === 0) && cortesMostrar.length > 0;
   return `
   <div class="card">
     <div class="row" style="justify-content:space-between">
       <h2>📸 Cortes de 10 min · Sesión ${s.num}</h2>
-      <button class="btn warn" onclick="corteAuto()">＋ Tomar Corte Ahora</button>
+      <div class="row" style="gap:6px">
+        ${esAuto ? `<button class="btn pri sm" onclick="cur().cortes=obtenerCortesEfectivos(cur());save();render();toast('✔ 6 cortes guardados en la sesión')">💾 Fijar estos 6 cortes</button>` : ''}
+        <button class="btn warn sm" onclick="corteAuto()">＋ Tomar Corte Ahora</button>
+      </div>
     </div>
-    <p class="muted">Sesión actual: <b>Sesión ${s.num}</b> (${s.inicio ? 'Inició '+s.inicio : 'Sin iniciar'}). Cada sesión tiene sus propios 6 cortes independientes.</p>
+    <p class="muted">Sesión actual: <b>Sesión ${s.num}</b> (${s.inicio ? 'Inició '+s.inicio : 'Sin iniciar'}). ${esAuto ? '<span class="badge ok">⚡ 6 cortes calculados automáticamente desde tus registros de llegada y salida</span>' : 'Cada sesión tiene sus propios 6 cortes independientes.'}</p>
     
-    ${s.cortes.slice().reverse().map((k, idx) => {
+    ${cortesMostrar.slice().reverse().map((k, idx) => {
       const i = k.n - 1;
       return `
       <div class="card" style="background:var(--card2);border-left:4px solid var(--blue)">
         <div class="row" style="justify-content:space-between;margin-bottom:8px">
           <b>Corte #${k.n} · Hora: ${k.hora}</b>
-          <button class="btn sm bad" onclick="if(confirm('¿Borrar corte?')){cur().cortes.splice(${i},1);save();render()}">🗑</button>
+          ${!esAuto ? `<button class="btn sm bad" onclick="if(confirm('¿Borrar corte?')){cur().cortes.splice(${i},1);save();render()}">🗑</button>` : `<span class="badge blue">Auto</span>`}
         </div>
         <div class="grid">
           <div>
             <label>Llegadas en los 10 min</label>
             <div class="step">
-              <button class="btn" onclick="cur().cortes[${i}].llegadas=Math.max(0,cur().cortes[${i}].llegadas-1);save();render()">−</button>
+              <button class="btn" onclick="if(!cur().cortes.length)cur().cortes=obtenerCortesEfectivos(cur());cur().cortes[${i}].llegadas=Math.max(0,cur().cortes[${i}].llegadas-1);save();render()">−</button>
               <b>${k.llegadas}</b>
-              <button class="btn" onclick="cur().cortes[${i}].llegadas++;save();render()">＋</button>
+              <button class="btn" onclick="if(!cur().cortes.length)cur().cortes=obtenerCortesEfectivos(cur());cur().cortes[${i}].llegadas++;save();render()">＋</button>
             </div>
           </div>
           <div>
             <label>Personas en cola</label>
             <div class="step">
-              <button class="btn" onclick="cur().cortes[${i}].cola=Math.max(0,cur().cortes[${i}].cola-1);save();render()">−</button>
+              <button class="btn" onclick="if(!cur().cortes.length)cur().cortes=obtenerCortesEfectivos(cur());cur().cortes[${i}].cola=Math.max(0,cur().cortes[${i}].cola-1);save();render()">−</button>
               <b>${k.cola}</b>
-              <button class="btn" onclick="cur().cortes[${i}].cola++;save();render()">＋</button>
+              <button class="btn" onclick="if(!cur().cortes.length)cur().cortes=obtenerCortesEfectivos(cur());cur().cortes[${i}].cola++;save();render()">＋</button>
             </div>
           </div>
           <div>
             <label>Servidores ocupados</label>
             <div class="step">
-              <button class="btn" onclick="cur().cortes[${i}].ocup=Math.max(0,cur().cortes[${i}].ocup-1);save();render()">−</button>
+              <button class="btn" onclick="if(!cur().cortes.length)cur().cortes=obtenerCortesEfectivos(cur());cur().cortes[${i}].ocup=Math.max(0,cur().cortes[${i}].ocup-1);save();render()">−</button>
               <b>${k.ocup}</b>
-              <button class="btn" onclick="cur().cortes[${i}].ocup++;save();render()">＋</button>
+              <button class="btn" onclick="if(!cur().cortes.length)cur().cortes=obtenerCortesEfectivos(cur());cur().cortes[${i}].ocup++;save();render()">＋</button>
             </div>
           </div>
         </div>
@@ -1301,7 +1348,8 @@ function vCortes(){
 function vResumen(){
   const s = cur();
   const k = calcSession(s);
-  const ks = S.sessions.map(calcSession);
+  const sesionesConDatos = S.sessions.filter(x => (x.people && x.people.length > 0) || x.inicio);
+  const ks = (sesionesConDatos.length ? sesionesConDatos : S.sessions).map(calcSession);
   const m = f => r2(avg(ks.map(f).filter(x=>x!=null&&!isNaN(x))));
   const mm = f => {
     const v = avg(ks.map(f).filter(x=>x!=null&&!isNaN(x)));
@@ -1525,7 +1573,8 @@ function rowsLlegadas(targetSessionId = null){
 
 function generarWorkbook(targetSessionId = null){
   const wb = XLSX.utils.book_new(), c = S.cfg;
-  const sesionesExportar = targetSessionId ? S.sessions.filter(s => s.id === targetSessionId) : S.sessions;
+  const conDatos = S.sessions.filter(s => (s.people && s.people.length > 0) || s.inicio);
+  const sesionesExportar = targetSessionId ? S.sessions.filter(s => s.id === targetSessionId) : (conDatos.length ? conDatos : S.sessions);
 
   // HOJA 1: IDENTIFICACIÓN Y PARÁMETROS DEL BLOQUE (FORMATO 1)
   const f1 = [
@@ -1559,7 +1608,7 @@ function generarWorkbook(targetSessionId = null){
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rowsLlegadas(targetSessionId)), 'Hoja 3 - Registro');
 
   // HOJA 3: CONTEO CADA 10 MINUTOS (FORMATO 3)
-  const rCortes = sesionesExportar.flatMap(s => s.cortes.map(k => ({
+  const rCortes = sesionesExportar.flatMap(s => obtenerCortesEfectivos(s).map(k => ({
     'Sesión': s.num,
     'Fecha': s.fecha,
     'Corte N°': k.n,
