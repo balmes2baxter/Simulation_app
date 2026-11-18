@@ -356,9 +356,9 @@ async function descargarDesdeSupabase(manual = false){
         const locS = S.sessions[idx];
         const remP = (remS.people||[]).length;
         const locP = (locS.people||[]).length;
-        const remD = (remS.people||[]).filter(p=>p.D).length;
-        const locD = (locS.people||[]).filter(p=>p.D).length;
-        if(remP >= locP && remD >= locD){
+        const remComp = (remS.people||[]).filter(p=>p.A&&p.B&&p.C&&p.D).length;
+        const locComp = (locS.people||[]).filter(p=>p.A&&p.B&&p.C&&p.D).length;
+        if(remP >= locP && remComp >= locComp){
           S.sessions[idx] = remS;
           cambios++;
         }
