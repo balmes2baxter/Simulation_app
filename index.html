@@ -342,9 +342,11 @@ async function descargarDesdeSupabase(manual = false){
     }
 
     let cambios = 0;
+    const remoteIds = new Set();
     remoteRows.forEach(row => {
       const remS = row.data && row.data.session;
       if(!remS) return;
+      remoteIds.add(remS.id);
 
       const idx = S.sessions.findIndex(x => x.id === remS.id);
       if(idx === -1){
@@ -356,7 +358,7 @@ async function descargarDesdeSupabase(manual = false){
         const locP = (locS.people||[]).length;
         const remD = (remS.people||[]).filter(p=>p.D).length;
         const locD = (locS.people||[]).filter(p=>p.D).length;
-        if(remP > locP || (remP === locP && remD > locD) || (remP === locP && remS.fin && !locS.fin)){
+        if(remP >= locP && remD >= locD){
           S.sessions[idx] = remS;
           cambios++;
         }
@@ -366,6 +368,16 @@ async function descargarDesdeSupabase(manual = false){
         S.cfg = { ...S.cfg, ...row.data.cfg };
       }
     });
+
+    // Limpiar sesiones de prueba vacías o antiguas que ya no estén en Supabase
+    const beforeLen = S.sessions.length;
+    S.sessions = S.sessions.filter(s => remoteIds.has(s.id) || (s.people && s.people.length > 6) || (s.inicio && !s.fin));
+    S.sessions.sort((a,b) => (a.num||0) - (b.num||0));
+    if(S.sessions.length !== beforeLen) cambios++;
+    if(S.sessions.length && !S.sessions.some(s => s.id === S.cur)){
+      S.cur = S.sessions[S.sessions.length - 1].id;
+      cambios++;
+    }
 
     if(cambios > 0){
       localStorage.setItem(KEY, JSON.stringify(S));
@@ -984,10 +996,10 @@ function vRegistro(){
       </select>
     </div>
     <div class="row" style="gap:4px">
-      <button class="btn sm pri" style="font-weight:700;padding:7px 9px" onclick="exportXLSX(${s.id})" title="Descargar Excel de esta sesión">
-        📥 Excel
+      <button class="btn sm pri" style="font-weight:700;padding:7px 9px" onclick="exportXLSX()" title="Descargar Excel Completo con las 3 Sesiones">
+        📥 Excel (3 Sesiones)
       </button>
-      <button class="btn sm blue" style="font-weight:700;padding:7px 9px" onclick="compartirArchivo('xlsx', ${s.id})" title="Enviar por WhatsApp o Drive">
+      <button class="btn sm blue" style="font-weight:700;padding:7px 9px" onclick="compartirArchivo('xlsx')" title="Enviar Excel Completo por WhatsApp o Drive">
         📲 Enviar
       </button>
       <button class="btn sm" style="padding:7px 8px" onclick="exportJSON(${s.id})" title="Descargar respaldo JSON de esta sesión">
